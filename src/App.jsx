@@ -10,28 +10,28 @@ const initialMessages = [
   {
     id: '1',
     role: 'agent',
-    timestamp: t(8),
+    timestamp: t(12),
     blocks: [
       {
         type: 'text',
-        content: 'Good morning, Noah. I pulled together your weekly numbers \u2014 a few things worth flagging.',
+        content: 'Morning. Your webhook pipeline processed 24,847 events overnight. Most providers are healthy, but there\u2019s one issue worth looking at.',
       },
     ],
   },
   {
     id: '2',
     role: 'agent',
-    timestamp: t(7),
+    timestamp: t(11),
     blocks: [
       {
         type: 'metric',
         data: {
-          label: 'Revenue',
-          value: '$112K',
-          trend: 12,
+          label: 'Events Processed',
+          value: '24.8K',
+          trend: 18,
           positive: true,
-          period: 'vs. last week',
-          sparkline: [64, 72, 68, 78, 85, 82, 94, 88, 102, 112],
+          period: 'last 24 hours',
+          sparkline: [180, 210, 195, 240, 220, 260, 310, 290, 340, 248],
         },
       },
     ],
@@ -39,26 +39,26 @@ const initialMessages = [
   {
     id: '3',
     role: 'agent',
-    timestamp: t(7),
+    timestamp: t(11),
     blocks: [
       {
         type: 'text',
-        content: 'Here\u2019s the client breakdown for this week:',
+        content: 'Delivery breakdown by provider:',
       },
       {
         type: 'table',
         data: {
           columns: [
-            { key: 'client', label: 'Client', type: 'name' },
-            { key: 'status', label: 'Status', type: 'status' },
-            { key: 'amount', label: 'Amount', align: 'right' },
+            { key: 'provider', label: 'Provider', type: 'name' },
+            { key: 'status', label: 'Health', type: 'status' },
+            { key: 'events', label: 'Events', align: 'right' },
           ],
           rows: [
-            { client: 'Meridian Design Co', status: 'Pending', amount: '$34,200' },
-            { client: 'Ingram & Associates', status: 'Overdue', amount: '$18,750' },
-            { client: 'Stonebridge Capital', status: 'Paid', amount: '$27,400' },
-            { client: 'Lark Creative', status: 'Paid', amount: '$19,600' },
-            { client: 'Apex Logistics', status: 'Pending', amount: '$12,050' },
+            { provider: 'Shopify', status: 'Healthy', events: '12,340' },
+            { provider: 'Stripe', status: 'Healthy', events: '8,204' },
+            { provider: 'GitHub', status: 'Degraded', events: '2,891' },
+            { provider: 'Twilio', status: 'Healthy', events: '1,105' },
+            { provider: 'SendGrid', status: 'Healthy', events: '307' },
           ],
         },
       },
@@ -67,18 +67,18 @@ const initialMessages = [
   {
     id: '4',
     role: 'agent',
-    timestamp: t(6),
+    timestamp: t(10),
     blocks: [
       {
         type: 'text',
-        content: 'Ingram & Associates hasn\u2019t responded to the last invoice. Want me to handle it?',
+        content: 'GitHub\u2019s webhook endpoint is returning 503s intermittently \u2014 47 events failed delivery in the last hour. The retry queue is holding them but they\u2019ll expire in 6 hours.',
       },
       {
         type: 'actions',
         data: [
-          { id: 'send-invoice', label: 'Send Invoice' },
-          { id: 'schedule-call', label: 'Schedule Call' },
-          { id: 'flag-review', label: 'Flag for Review' },
+          { id: 'retry-now', label: 'Retry Failed Events' },
+          { id: 'pause-endpoint', label: 'Pause Endpoint' },
+          { id: 'view-logs', label: 'View Logs' },
         ],
       },
     ],
@@ -86,11 +86,11 @@ const initialMessages = [
 ]
 
 const agentReplies = [
-  'Got it. I\u2019ll take care of that right away.',
-  'Done. I\u2019ve updated the records and will keep you posted.',
-  'Sure thing. I\u2019ll follow up and circle back if anything changes.',
-  'Understood. Everything\u2019s queued up \u2014 I\u2019ll ping you when it\u2019s resolved.',
-  'On it. Let me know if you need anything else adjusted.',
+  'Done. I\u2019ve queued those events for immediate retry \u2014 I\u2019ll flag any that fail again.',
+  'Endpoint paused. Incoming GitHub events will buffer until you re-enable it.',
+  'Pulling the delivery logs now. 43 of the 47 failures are timeout errors, 4 are malformed responses.',
+  'Got it. I\u2019ll monitor the endpoint and alert you if the error rate exceeds 5% again.',
+  'Updated. I\u2019ve extended the retry window to 12 hours for the affected batch.',
 ]
 
 function App() {
@@ -125,7 +125,7 @@ function App() {
         timestamp: new Date().toISOString(),
         blocks: [{ type: 'text', content: agentReplies[Math.floor(Math.random() * agentReplies.length)] }],
       })
-    }, 1200 + Math.random() * 1300)
+    }, 1000 + Math.random() * 1200)
   }, [addMessage])
 
   const handleAction = useCallback(() => {}, [])

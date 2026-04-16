@@ -2,6 +2,9 @@ import { useState } from 'react'
 import theme from '../theme.js'
 
 const statusMap = {
+  Healthy: { color: theme.colors.green, bg: theme.colors.greenSoft },
+  Degraded: { color: theme.colors.amber, bg: theme.colors.amberSoft },
+  Down: { color: theme.colors.red, bg: theme.colors.redSoft },
   Paid: { color: theme.colors.green, bg: theme.colors.greenSoft },
   Pending: { color: theme.colors.amber, bg: theme.colors.amberSoft },
   Overdue: { color: theme.colors.red, bg: theme.colors.redSoft },
@@ -103,7 +106,7 @@ export default function DataTable({ columns, rows }) {
           {rows.map((r, i) => <Row key={i} row={r} columns={columns} isLast={i === rows.length - 1} />)}
         </tbody>
       </table>
-      <div style={styles.footer}>{rows.length} clients</div>
+      <div style={styles.footer}>{rows.length} providers</div>
     </div>
   )
 }

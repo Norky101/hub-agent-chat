@@ -216,3 +216,31 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 **Why:** Every premium AI chat (ChatGPT, Claude, Gemini, Jarvis) uses open text for AI responses. Bubbles are a pattern from SMS/messaging apps — they make sense for peer-to-peer chat but feel wrong for an AI assistant. The asymmetry (no bubble for agent, dark pill for user) creates clear visual distinction without the "chatbot widget" feel.
 
 **Alternatives considered:** Keeping subtle bubbles for agent messages. This always looks like Intercom/Zendesk no matter how you style it.
+
+---
+
+## 23. Webhook-Themed Conversation — Continuity with Part 1
+
+**Decision:** Rebrand the demo conversation from generic "business review" to webhook platform context — event volumes, delivery rates, failed payloads, provider health (Shopify, Stripe, GitHub).
+
+**Why:** Part 1 was a Webhook Hub with a provider registry pattern. Making Part 2's AI assistant talk about webhook data shows Aaron that this is one coherent product vision, not two disconnected exercises. It also makes the rich content types more specific and believable — a metric card showing "Events Processed: 24.8K" is more compelling than generic "$112K Revenue" when the product is a webhook platform.
+
+**Alternatives considered:** Keeping the generic business data. But Aaron explicitly noted the "provider registry pattern" from Part 1 — referencing that world shows product thinking beyond the spec.
+
+---
+
+## 24. Floating Background Elements
+
+**Decision:** Subtle CSS gradient shapes (blurred circles) that drift slowly across the background using keyframe animations. No actual images — pure CSS.
+
+**Why:** Reference screenshots (Synecdoche floating rocks, Jarvis iridescent orb) all use ambient visual elements to add depth. Static backgrounds feel flat. The floating shapes are decorative, low-opacity, and don't compete with content. They make the product feel alive without being distracting.
+
+**Implementation:** 3-4 absolutely positioned divs with radial-gradient backgrounds, large blur radius, very low opacity (0.15-0.25), slow float animations (20-40s cycles). Different sizes and speeds create parallax depth.
+
+---
+
+## 25. Production Startup Quality Standard
+
+**Decision:** Treat every detail as if paying customers will see it tomorrow. No placeholder data, no "demo" shortcuts, no generic copy.
+
+**Why:** Aaron is evaluating whether this "looks like a product I'd ship." Startups ship with intention — every string, every number, every interaction tells a story. Generic data ("Client 1", "Status: Active") screams prototype. Specific, realistic data ("Shopify order webhook failed 3 retries") screams product.
