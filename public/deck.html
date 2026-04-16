@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub Agent — Presentation</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; font-family: 'IBM Plex Sans', sans-serif; background: #f8f7f4; color: #12110f; -webkit-font-smoothing: antialiased; overflow: hidden; }
+
+  .deck { height: 100%; position: relative; }
+  .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 60px 80px; opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; pointer-events: none; }
+  .slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  h1 { font-size: 52px; font-weight: 500; letter-spacing: -0.03em; line-height: 1.15; }
+  h2 { font-size: 36px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .subtitle { font-size: 18px; color: #8a8681; margin-bottom: 40px; line-height: 1.5; }
+  .accent { color: #4F6EF7; }
+  .muted { color: #8a8681; }
+  .small { font-size: 14px; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  .cols { display: grid; gap: 48px; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .col-label { font-size: 11px; font-weight: 600; color: #4F6EF7; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+
+  ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  li { font-size: 15px; line-height: 1.6; display: flex; align-items: flex-start; gap: 8px; }
+  li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #4F6EF7; margin-top: 8px; flex-shrink: 0; }
+  li.check::before { content: '✓'; width: auto; height: auto; background: none; color: #16783a; font-size: 13px; margin-top: 2px; font-weight: 600; }
+
+  .gap-row { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid rgba(18,17,15,0.06); }
+  .gap-row:last-child { border-bottom: none; }
+  .gap-label { font-size: 15px; font-weight: 500; min-width: 220px; flex-shrink: 0; }
+  .gap-desc { font-size: 14px; color: #8a8681; }
+
+  .logo-mark { width: 48px; height: 48px; margin-bottom: 24px; }
+  .links { margin-top: 32px; display: flex; flex-direction: column; gap: 6px; }
+  .links a { color: #4F6EF7; text-decoration: none; font-size: 15px; font-family: 'IBM Plex Mono', monospace; }
+
+  .nav { position: fixed; bottom: 28px; right: 40px; display: flex; gap: 8px; z-index: 10; }
+  .nav button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(18,17,15,0.1); background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; font-size: 16px; color: #12110f; }
+  .nav button:hover { border-color: #4F6EF7; color: #4F6EF7; }
+  .counter { position: fixed; bottom: 34px; left: 40px; font-size: 13px; color: #b5b0ab; font-family: 'IBM Plex Mono', monospace; }
+
+  .one-more { background: #12110f; color: #f8f7f4; }
+  .one-more h2 { color: #f8f7f4; }
+  .one-more .subtitle { color: rgba(248,247,244,0.5); }
+  .one-more .accent { color: #7B8FFF; }
+  .one-more li::before { background: #4F6EF7; }
+
+  @media (max-width: 768px) {
+    .slide { padding: 32px 24px; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 24px; }
+    .cols-2, .cols-3 { grid-template-columns: 1fr; gap: 32px; }
+    .gap-row { flex-direction: column; gap: 4px; }
+    .gap-label { min-width: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide active" data-slide="0">
+    <svg class="logo-mark" viewBox="0 0 32 32" fill="none">
+      <line x1="16" y1="16" x2="7" y2="7" stroke="rgba(79,110,247,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="16" y1="16" x2="26" y2="9" stroke="rgba(79,110,247,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="16" y1="16" x2="16" y2="27" stroke="rgba(79,110,247,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="7" cy="7" r="2.5" fill="#4F6EF7" opacity="0.7"/>
+      <circle cx="26" cy="9" r="2.5" fill="#4F6EF7" opacity="0.7"/>
+      <circle cx="16" cy="27" r="2.5" fill="#4F6EF7" opacity="0.7"/>
+      <circle cx="16" cy="16" r="5" fill="#4F6EF7"/>
+      <circle cx="16" cy="16" r="2" fill="white" opacity="0.9"/>
+    </svg>
+    <h1>Hub Agent</h1>
+    <p class="subtitle" style="margin-top:12px">AI-powered webhook pipeline assistant.<br>A React conversation component that feels like talking to a sharp colleague.</p>
+    <div class="links">
+      <a href="https://hub-agent-chat.pages.dev" target="_blank">hub-agent-chat.pages.dev</a>
+      <a href="https://github.com/Norky101/hub-agent-chat" target="_blank">github.com/Norky101/hub-agent-chat</a>
+    </div>
+    <p class="muted small" style="margin-top:40px">Noah Pilkington — Frontend Evaluation</p>
+  </div>
+
+  <!-- SLIDE 2: What I Built -->
+  <div class="slide" data-slide="1">
+    <h2>What I Built</h2>
+    <p class="subtitle">Every spec requirement met, plus the details Aaron didn't ask for.</p>
+    <div class="cols cols-2">
+      <div>
+        <div class="col-label">Spec Requirements</div>
+        <ul>
+          <li class="check">4 response types: prose, metric card, data table, action buttons</li>
+          <li class="check">IBM Plex Sans/Mono, #4F6EF7, #f8f7f4 — exact design system</li>
+          <li class="check">Input bar, timestamps, agent name, smooth scroll</li>
+          <li class="check">Mobile responsive — 375px to 1440px</li>
+          <li class="check">Deployed to Cloudflare Pages</li>
+          <li class="check">Inline styles only — zero CSS files</li>
+          <li class="check">36 tests passing &nbsp;<span class="mono muted small">npm test</span></li>
+          <li class="check">40 decisions documented in DECISIONS.md</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-label">Product Instinct</div>
+        <ul>
+          <li>Expandable table rows + metric card drill-down</li>
+          <li>Inline trust signals — LIVE / FROM LOGS at the claim level</li>
+          <li>Collapsible reasoning trail — "How I got here"</li>
+          <li>Proactive incident alerts with "Assign to AI Agent"</li>
+          <li>Contextual follow-up suggestions with rich responses</li>
+          <li>Voice input via Web Speech API</li>
+          <li>Viewport focus fade — scroll-aware message opacity</li>
+          <li>Copy button, tab notifications, branded favicon</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: The Agent Thinks -->
+  <div class="slide" data-slide="2">
+    <h2>A Sharp Colleague, Not Customer Support</h2>
+    <p class="subtitle">The agent doesn't just report data — it diagnoses, recommends, and acts.</p>
+    <div class="cols cols-3">
+      <div>
+        <div class="col-label">Diagnose</div>
+        <ul>
+          <li>"GitHub's API gateway is throttling under load"</li>
+          <li>"Response times jumped from 200ms to 12s"</li>
+          <li>"47 events in retry queue, expire in 6 hours"</li>
+          <li>Reasoning trail shows investigation steps</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-label">Recommend</div>
+        <ul>
+          <li>"Retry with 30s extended timeout"</li>
+          <li>"~80% should recover past the bottleneck"</li>
+          <li>"Retry again in 1h when load drops"</li>
+          <li>Specific and actionable, not generic</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-label">Act</div>
+        <ul>
+          <li>Click "Retry" → agent reports progress live</li>
+          <li>Click "View Logs" → analysis → more actions</li>
+          <li>Click "Assign to AI Agent" → full autonomy</li>
+          <li>Proactive alerts when new incidents happen</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Industry Gaps -->
+  <div class="slide" data-slide="3">
+    <h2>Gaps Nobody Else Fills</h2>
+    <p class="subtitle">Analyzed ChatGPT, Claude, Dust.tt, Intercom Fin, and Glean. Built what they're missing.</p>
+    <div>
+      <div class="gap-row">
+        <div class="gap-label">Data locked in prose</div>
+        <div class="gap-desc">Metrics, tables, and sparklines are first-class elements — not paragraphs.</div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-label">No inline trust signals</div>
+        <div class="gap-desc">LIVE / FROM LOGS tags at the claim level. No other product ships this.</div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-label">Answers stop at information</div>
+        <div class="gap-desc">Action buttons trigger real responses. "Assign to AI Agent" delegates end-to-end.</div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-label">Follow-up is broken</div>
+        <div class="gap-desc">Contextual suggestion pills guide the next question. Every pill produces a rich response.</div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-label">Chat can't show agent work</div>
+        <div class="gap-desc">Reasoning trail shows investigation steps. Proactive alerts show live monitoring.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: One More Thing -->
+  <div class="slide one-more" data-slide="4">
+    <h2>One More Thing</h2>
+    <p class="subtitle">What I'd build next — and it's already half done.</p>
+    <div style="max-width:700px">
+      <ul>
+        <li style="font-size:17px;line-height:1.7">Connect this frontend to the <span class="accent">Webhook Hub from Part 1</span> via Claude's API</li>
+        <li style="font-size:17px;line-height:1.7">A real AI agent that queries your <span class="accent">live D1 database</span>, monitors your actual pipeline, and takes real actions</li>
+        <li style="font-size:17px;line-height:1.7">The backend exists. The frontend exists. The missing piece is the <span class="accent">agent in the middle</span></li>
+        <li style="font-size:17px;line-height:1.7">Both evaluations become <span class="accent">one product</span></li>
+      </ul>
+    </div>
+    <p class="muted small" style="margin-top:48px;color:rgba(248,247,244,0.35)">13 components · 2 hooks · 36 tests · 40 decisions · 0 runtime dependencies</p>
+  </div>
+
+</div>
+
+<div class="counter"><span id="current">1</span> / 5</div>
+<div class="nav">
+  <button onclick="navigate(-1)">←</button>
+  <button onclick="navigate(1)">→</button>
+</div>
+
+<script>
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const counter = document.getElementById('current');
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next < 0 || next >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = next;
+    slides[current].classList.add('active');
+    counter.textContent = current + 1;
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    if (e.key === 'ArrowLeft') navigate(-1);
+  });
+
+  // Touch swipe
+  let touchStart = 0;
+  document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+  });
+</script>
+
+</body>
+</html>
