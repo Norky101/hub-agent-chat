@@ -1,4 +1,5 @@
 import theme from '../theme.js'
+import useViewportFade from '../hooks/useViewportFade.js'
 import MetricCard from './MetricCard.jsx'
 import DataTable from './DataTable.jsx'
 import ActionButtons from './ActionButtons.jsx'
@@ -7,12 +8,10 @@ import FollowUps from './FollowUps.jsx'
 import SourceTag from './SourceTag.jsx'
 
 const styles = {
-  row: (isUser, animate, focusOpacity) => ({
+  row: (isUser) => ({
     display: 'flex',
     justifyContent: isUser ? 'flex-end' : 'flex-start',
-    opacity: animate ? 0 : (focusOpacity ?? 1),
-    animation: animate ? 'fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
-    transition: 'opacity 0.6s ease',
+    transition: 'opacity 0.3s ease',
   }),
   agentContent: {
     maxWidth: 560,
@@ -65,12 +64,17 @@ function renderText(text) {
   })
 }
 
-export default function MessageBubble({ message, onAction, onSend, animate, focusOpacity }) {
+export default function MessageBubble({ message, onAction, onSend, animate, scrollContainerRef }) {
   const isUser = message.role === 'user'
+  const { ref, opacity } = useViewportFade(scrollContainerRef)
+
+  const animStyle = animate
+    ? { opacity: 0, animation: 'fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' }
+    : { opacity }
 
   if (isUser) {
     return (
-      <div style={styles.row(true, animate, focusOpacity)}>
+      <div ref={ref} style={{ ...styles.row(true), ...animStyle }}>
         <div>
           <div style={styles.userPill}>{message.blocks[0]?.content}</div>
           {message.showMeta && <div style={{ ...styles.timestamp, textAlign: 'right' }}>{formatTime(message.timestamp)}</div>}
@@ -80,7 +84,7 @@ export default function MessageBubble({ message, onAction, onSend, animate, focu
   }
 
   return (
-    <div style={styles.row(false, animate, focusOpacity)}>
+    <div ref={ref} style={{ ...styles.row(false), ...animStyle }}>
       <div style={styles.agentContent}>
         {message.showMeta && <div style={styles.timestamp}>{formatTime(message.timestamp)}</div>}
         {message.blocks.map((block, i) => {
@@ -92,14 +96,10 @@ export default function MessageBubble({ message, onAction, onSend, animate, focu
                   {block.source && <SourceTag source={block.source} />}
                 </div>
               )
-            case 'metric':
-              return <MetricCard key={i} {...block.data} />
-            case 'table':
-              return <DataTable key={i} columns={block.data.columns} rows={block.data.rows} details={block.data.details} />
-            case 'actions':
-              return <ActionButtons key={i} actions={block.data} onAction={onAction} />
-            default:
-              return null
+            case 'metric': return <MetricCard key={i} {...block.data} />
+            case 'table': return <DataTable key={i} columns={block.data.columns} rows={block.data.rows} details={block.data.details} />
+            case 'actions': return <ActionButtons key={i} actions={block.data} onAction={onAction} />
+            default: return null
           }
         })}
         {message.reasoning && <ReasoningTrail steps={message.reasoning} />}
