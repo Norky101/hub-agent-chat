@@ -72,10 +72,15 @@ const styles = {
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
   },
-  newChatBtn: (hovered) => ({
+  topBar: {
     position: 'fixed',
     top: 20,
     right: 24,
+    display: 'flex',
+    gap: 8,
+    zIndex: 20,
+  },
+  topBtn: (hovered) => ({
     display: 'flex',
     alignItems: 'center',
     gap: 6,
@@ -92,9 +97,18 @@ const styles = {
     fontSize: 13,
     fontWeight: 400,
     color: hovered ? theme.colors.text : theme.colors.textMuted,
-    zIndex: 20,
     boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
   }),
+  badge: {
+    fontSize: 10,
+    fontWeight: 600,
+    fontFamily: theme.fonts.mono,
+    color: theme.colors.accent,
+    background: theme.colors.accentSoft,
+    padding: '1px 6px',
+    borderRadius: theme.radius.pill,
+    lineHeight: '16px',
+  },
   separator: {
     width: '100%',
     height: 1,
@@ -136,11 +150,12 @@ const styles = {
   }),
 }
 
-export default function ChatWindow({ messages, isTyping, onSend, onAction, onNewChat, mountedAt, speechSupported, isListening, onToggleMic }) {
+export default function ChatWindow({ messages, isTyping, onSend, onAction, onNewChat, onShowMC, mountedAt, speechSupported, isListening, onToggleMic, sessionCount }) {
   const endRef = useRef(null)
   const scrollRef = useRef(null)
   const [showScroll, setShowScroll] = useState(false)
   const [newChatHovered, setNewChatHovered] = useState(false)
+  const [mcHovered, setMcHovered] = useState(false)
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -183,18 +198,35 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, onNew
     <div style={styles.page}>
       <style>{STYLES}</style>
 
-      {messages.length > 0 && onNewChat && (
-        <button
-          style={styles.newChatBtn(newChatHovered)}
-          onMouseEnter={() => setNewChatHovered(true)}
-          onMouseLeave={() => setNewChatHovered(false)}
-          onClick={onNewChat}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-          </svg>
-          New chat
-        </button>
+      {messages.length > 0 && (
+        <div style={styles.topBar}>
+          {sessionCount > 1 && onShowMC && (
+            <button
+              style={styles.topBtn(mcHovered)}
+              onMouseEnter={() => setMcHovered(true)}
+              onMouseLeave={() => setMcHovered(false)}
+              onClick={onShowMC}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+              <span style={styles.badge}>{sessionCount}</span>
+            </button>
+          )}
+          {onNewChat && (
+            <button
+              style={styles.topBtn(newChatHovered)}
+              onMouseEnter={() => setNewChatHovered(true)}
+              onMouseLeave={() => setNewChatHovered(false)}
+              onClick={onNewChat}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+              New chat
+            </button>
+          )}
+        </div>
       )}
 
       <div className="chat-scroll" style={styles.content} ref={scrollRef} onScroll={onScrollHandler}>
