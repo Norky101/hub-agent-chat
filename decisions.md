@@ -387,6 +387,38 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 
 # What I'd Do Differently With More Time
 
+---
+
+## 38. Proactive Incident Alerts — Agent Interrupts When Something Breaks
+
+**Decision:** After 45 seconds, a red-bordered alert banner pops into the conversation: "Stripe returning 429 rate limit errors, 23 events queued." Presents three remediation options including "Assign to AI Agent."
+
+**Why:** A sharp colleague doesn't wait to be asked — they tap you on the shoulder when something breaks. Every other feature in this component is reactive (user asks, agent answers). The proactive alert flips that. It demonstrates the agent is monitoring the pipeline in the background and will escalate when needed. This is the single biggest differentiator from a chatbot — chatbots wait, agents act.
+
+**The "Assign to AI Agent" option:** The most important button in the component. When clicked, the agent responds with a full autonomous plan: throttle immediately, monitor the 429 rate, drain the queue on clear, run a delivery audit, send a summary. It explicitly says "no action needed from you unless I hit something unexpected." This is what enterprise users want — delegation, not just information.
+
+**Visual treatment:** AlertBanner component with red left-border (3px), red-tinted background, triangle alert icon, "INCIDENT DETECTED" header. Visually distinct from regular messages so the user's eye catches it immediately even when scrolling.
+
+**Alternatives considered:** Toast/notification popup (dismissed too easily, loses context). Sound alert (gimmicky, the spec says business tool). Sidebar notification badge (we don't have a sidebar). The in-conversation alert is the right choice because it becomes part of the conversation history — you can scroll back and see what happened.
+
+---
+
+## 39. Product Instinct Details — Copy, Relative Time, Tab Notifications
+
+**Decision:** Three "obviously should be there" features added in a single pass:
+
+**Copy button:** Hover any agent message, a copy icon appears top-right. Copies all text blocks with bold markers stripped. Shows "Copied" confirmation for 1.5s. Users need to paste error breakdowns into Slack, Jira, email — this should be one click.
+
+**Relative timestamps:** "just now", "2m ago", "1h ago" instead of absolute clock times. Falls back to date format after 24h. A live conversation feels more alive with relative time. Also suppresses duplicate timestamps when agent responds within 10 seconds of user (eliminates "just now" / "just now" redundancy).
+
+**Tab title notification:** When the agent responds and the browser tab is not focused, the title changes to "New message — Hub Agent." Restores when the user returns. Every real chat product does this — its absence signals "demo."
+
+**Why these three:** They're invisible when present, glaring when absent. Aaron evaluates product instinct by looking for the details he didn't specify. These are exactly that — things a real product has that the spec doesn't mention.
+
+---
+
+# What I'd Do Differently With More Time
+
 **1. Real AI backend.** The mock responses are crafted to demonstrate the UI, but connecting to Claude's API via a Cloudflare Worker would make the conversation genuinely interactive. The component architecture already supports it — swap the `handleSend` mock for an API call and the blocks render the same way.
 
 **2. Streaming responses.** Agent text should appear word-by-word, not all at once after a typing indicator. This is how real AI products feel responsive. The block-based message model supports this — stream text into the first block, then render subsequent blocks (metric, table) once complete.
