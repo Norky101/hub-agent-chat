@@ -33,6 +33,10 @@ const styles = {
     color: theme.colors.text,
     letterSpacing: '0.01em',
   },
+  userWrap: {
+    maxWidth: '75%',
+    marginLeft: 'auto',
+  },
   userPill: {
     fontSize: 15,
     lineHeight: 1.6,
@@ -42,9 +46,6 @@ const styles = {
     background: theme.colors.userBubble,
     padding: '11px 18px',
     borderRadius: '20px 20px 4px 20px',
-    maxWidth: '75%',
-    whiteSpace: 'pre-wrap',
-    wordWrap: 'break-word',
     overflowWrap: 'break-word',
   },
   timestamp: {
@@ -142,8 +143,8 @@ export default function MessageBubble({ message, onAction, onSend, animate, scro
 
   if (isUser) {
     return (
-      <div ref={ref} style={{ ...styles.row(true), ...animStyle }}>
-        <div>
+      <div ref={ref} style={animStyle}>
+        <div style={styles.userWrap}>
           <div style={styles.userPill}>{message.blocks[0]?.content}</div>
           {message.showMeta && <div style={{ ...styles.timestamp, textAlign: 'right' }}>{formatRelativeTime(message.timestamp)}</div>}
         </div>
