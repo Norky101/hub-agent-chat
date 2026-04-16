@@ -1,18 +1,22 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 
-const SpeechRecognition = typeof window !== 'undefined'
+const SpeechRecognitionAPI = typeof window !== 'undefined'
   ? window.SpeechRecognition || window.webkitSpeechRecognition
   : null
 
 export default function useSpeechRecognition(onTranscript) {
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef(null)
-  const supported = !!SpeechRecognition
+  const onTranscriptRef = useRef(onTranscript)
+  onTranscriptRef.current = onTranscript
+  const supported = !!SpeechRecognitionAPI
 
-  useEffect(() => {
-    if (!SpeechRecognition) return
+  // Create a fresh instance each time — Safari/iOS requires this.
+  // Reusing the same SpeechRecognition object after onend fails silently on Safari.
+  const createRecognition = useCallback(() => {
+    if (!SpeechRecognitionAPI) return null
 
-    const recognition = new SpeechRecognition()
+    const recognition = new SpeechRecognitionAPI()
     recognition.continuous = false
     recognition.interimResults = true
     recognition.lang = 'en-US'
@@ -22,34 +26,39 @@ export default function useSpeechRecognition(onTranscript) {
       for (let i = 0; i < event.results.length; i++) {
         transcript += event.results[i][0].transcript
       }
-      if (onTranscript) onTranscript(transcript)
+      if (onTranscriptRef.current) onTranscriptRef.current(transcript)
     }
 
     recognition.onend = () => {
       setIsListening(false)
+      recognitionRef.current = null
     }
 
     recognition.onerror = () => {
       setIsListening(false)
+      recognitionRef.current = null
     }
 
-    recognitionRef.current = recognition
-
-    return () => {
-      recognition.abort()
-    }
-  }, [onTranscript])
+    return recognition
+  }, [])
 
   const toggle = useCallback(() => {
-    if (!recognitionRef.current) return
-    if (isListening) {
+    if (isListening && recognitionRef.current) {
       recognitionRef.current.stop()
       setIsListening(false)
     } else {
-      recognitionRef.current.start()
-      setIsListening(true)
+      const recognition = createRecognition()
+      if (!recognition) return
+      recognitionRef.current = recognition
+      try {
+        recognition.start()
+        setIsListening(true)
+      } catch {
+        setIsListening(false)
+        recognitionRef.current = null
+      }
     }
-  }, [isListening])
+  }, [isListening, createRecognition])
 
   return { isListening, toggle, supported }
 }
