@@ -13,6 +13,10 @@ const STYLES = `
     0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
     30% { opacity: 0.7; transform: translateY(-3px); }
   }
+  @keyframes logoPulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
   .chat-scroll::-webkit-scrollbar { width: 5px; }
   .chat-scroll::-webkit-scrollbar-track { background: transparent; }
   .chat-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 4px; }
@@ -69,19 +73,24 @@ const styles = {
   },
   typingRow: {
     display: 'flex',
-    gap: 5,
     alignItems: 'center',
+    gap: 10,
     padding: '4px 0',
     opacity: 0,
     animation: 'fadeUp 0.3s ease forwards',
   },
-  dot: (delay) => ({
-    width: 5,
-    height: 5,
+  typingLogo: {
+    width: 20,
+    height: 20,
     borderRadius: '50%',
-    background: theme.colors.textMuted,
-    animation: `typing 1.4s ease-in-out ${delay}s infinite`,
-  }),
+    background: theme.colors.accent,
+    animation: 'logoPulse 1.8s ease-in-out infinite',
+  },
+  typingLabel: {
+    fontSize: 13,
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.sans,
+  },
   scrollBtn: (vis) => ({
     position: 'fixed',
     bottom: 100,
@@ -148,9 +157,8 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
             })}
             {isTyping && (
               <div style={styles.typingRow}>
-                <div style={styles.dot(0)} />
-                <div style={styles.dot(0.15)} />
-                <div style={styles.dot(0.3)} />
+                <div style={styles.typingLogo} />
+                <span style={styles.typingLabel}>Thinking...</span>
               </div>
             )}
             <div ref={endRef} />

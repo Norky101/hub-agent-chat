@@ -257,6 +257,26 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 
 ---
 
+## 26a. Viewport-Based Focus Fade (Upgrade from Index-Based)
+
+**Decision:** Replaced the static index-based opacity with scroll-position-aware fading. A custom `useViewportFade` hook computes each message's opacity based on where it sits in the viewport: bottom 65% = full opacity (focus zone), top 35% = gradual fade to 0.35.
+
+**Why:** The initial index-based approach (last 2 messages full, older ones faded) broke when users scrolled up — old messages stayed faded even when you were reading them. That's wrong. The fade should follow your attention, not the message order. Scrolling up to read history should bring those messages into full focus. Scrolling back down fades them again naturally. This mimics how human attention works — what you're looking at is in focus.
+
+**Alternatives considered:** IntersectionObserver (cleaner API but doesn't give continuous opacity values — only in/out). The scroll event approach gives smooth, proportional fading.
+
+---
+
+## 26b. Branded Typing Indicator (Logo Pulse)
+
+**Decision:** Replaced generic 3-dot typing indicator with a pulsing accent-colored circle (matching the welcome screen brand mark) plus "Thinking..." label.
+
+**Why:** Three bouncing dots are the most generic pattern in chat UI. Every product uses them. Replacing with a branded element (the accent circle) makes the typing state feel like the agent's identity, not a loading spinner. The "Thinking..." label is more honest than silent dots — it communicates that the agent is doing work, not just waiting.
+
+**Alternatives considered:** Dots with accent color (still generic). Progress bar (implies deterministic progress, which AI responses aren't). Status text that updates ("Searching..." → "Analyzing...") — good idea for a future enhancement but more complex than needed for this iteration.
+
+---
+
 ## 27. Inline Trust Signals (Source Tags)
 
 **Decision:** Small color-coded tags next to data claims showing provenance: "LIVE" (green, real-time pipeline data), "FROM LOGS" (gray, historical), "CALCULATED" (blue, model-derived), "STATUS PAGE" (amber, external source).
