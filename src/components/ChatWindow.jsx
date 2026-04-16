@@ -135,6 +135,20 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, onNew
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isTyping])
 
+  // Tab title notification when agent responds and tab is not visible
+  useEffect(() => {
+    if (messages.length === 0) return
+    const last = messages[messages.length - 1]
+    if (last.role !== 'agent') return
+    if (document.hidden) {
+      const original = document.title
+      document.title = 'New message — Hub Agent'
+      const restore = () => { document.title = original; document.removeEventListener('visibilitychange', restore) }
+      document.addEventListener('visibilitychange', restore)
+      return () => document.removeEventListener('visibilitychange', restore)
+    }
+  }, [messages])
+
   const onScrollHandler = () => {
     const el = scrollRef.current
     if (!el) return
