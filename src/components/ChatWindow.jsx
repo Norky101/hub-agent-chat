@@ -38,7 +38,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     background: theme.colors.bg,
-    animation: 'pageIn 0.8s ease forwards',
+    animation: 'pageIn 1.6s ease forwards',
     opacity: 0,
   },
   content: {
