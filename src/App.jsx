@@ -14,7 +14,7 @@ const initialMessages = [
     blocks: [
       {
         type: 'text',
-        content: 'Morning. Your webhook pipeline processed 24,847 events overnight. Most providers are healthy, but there\u2019s one issue worth looking at.',
+        content: 'Morning. Your pipeline processed 24,847 events overnight. Four providers are clean, but GitHub needs attention.',
       },
     ],
   },
@@ -51,7 +51,7 @@ const initialMessages = [
     blocks: [
       {
         type: 'text',
-        content: 'Delivery breakdown by provider:',
+        content: 'Provider breakdown \u2014 click any row for details:',
       },
       {
         type: 'table',
@@ -111,14 +111,18 @@ const initialMessages = [
     blocks: [
       {
         type: 'text',
-        content: 'GitHub\u2019s webhook endpoint is returning 503s intermittently \u2014 47 events failed delivery in the last hour. The retry queue is holding them but they\u2019ll expire in 6 hours.',
+        content: 'GitHub\u2019s push event endpoint has been returning 503s for about 45 minutes. Looks like their API gateway is throttling under load \u2014 response times jumped from 200ms to 12s before timing out. 47 events are sitting in the retry queue and will expire in 6 hours.',
+      },
+      {
+        type: 'text',
+        content: 'My recommendation: retry the batch with an extended 30s timeout. Based on the pattern, about 80% should recover once we get past the gateway bottleneck. For the rest, I can hold them and retry again in an hour when GitHub\u2019s load typically drops.',
       },
       {
         type: 'actions',
         data: [
-          { id: 'retry-now', label: 'Retry Failed Events' },
-          { id: 'pause-endpoint', label: 'Pause Endpoint' },
-          { id: 'view-logs', label: 'View Logs' },
+          { id: 'retry-now', label: 'Retry with extended timeout' },
+          { id: 'pause-endpoint', label: 'Pause \u0026 buffer' },
+          { id: 'view-logs', label: 'Show me the logs' },
         ],
       },
     ],
@@ -126,17 +130,61 @@ const initialMessages = [
 ]
 
 const actionResponses = {
-  'retry-now': 'Retrying 47 failed GitHub events now. 43 are timeout errors \u2014 I\u2019ll increase the timeout to 30s for this batch. You\u2019ll get a summary once they\u2019re processed.',
-  'pause-endpoint': 'GitHub endpoint paused. Incoming events will buffer for up to 24 hours. I\u2019ll notify you when their status page reports recovery.',
-  'view-logs': 'Here\u2019s what I\u2019m seeing in the logs: 43 of 47 failures are 503 gateway timeouts (avg response time 12.4s). The other 4 returned malformed JSON. All originated from the push event webhook.',
+  'retry-now': [
+    {
+      type: 'text',
+      content: 'Retrying all 47 events with a 30s timeout. I\u2019ll batch them in groups of 10 to avoid hammering the endpoint.',
+    },
+    {
+      type: 'text',
+      content: 'First batch is through \u2014 8 of 10 delivered successfully. The 2 that failed are both large payload push events (>500KB). I\u2019ll split those into chunked deliveries and retry separately.',
+    },
+  ],
+  'pause-endpoint': [
+    {
+      type: 'text',
+      content: 'GitHub endpoint paused. All incoming push, PR, and issue events will buffer \u2014 current queue can hold about 72 hours at this volume.',
+    },
+    {
+      type: 'text',
+      content: 'I\u2019m watching GitHub\u2019s status page. Their last incident took ~2 hours to resolve. I\u2019ll auto-resume delivery and drain the buffer once their API returns to <500ms response times. You\u2019ll get a notification either way.',
+    },
+  ],
+  'view-logs': [
+    {
+      type: 'text',
+      content: 'Here\u2019s the pattern I\u2019m seeing across the 47 failures:',
+    },
+    {
+      type: 'text',
+      content: '\u2022 43 are 503 gateway timeouts \u2014 all push events, avg payload 128KB, response cut off at 10s\n\u2022 4 returned 200 but with malformed JSON bodies (likely partial responses from the gateway)\n\u2022 All failures started at 2:14 AM, correlating with a spike in GitHub\u2019s own event volume\n\u2022 The endpoint itself is fine \u2014 this is upstream GitHub infrastructure',
+    },
+    {
+      type: 'text',
+      content: 'I\u2019d recommend retrying the 43 timeouts with an extended window. The 4 malformed responses need a full re-delivery since the original payloads were corrupted. Want me to handle both?',
+    },
+    {
+      type: 'actions',
+      data: [
+        { id: 'retry-all', label: 'Retry all 47' },
+        { id: 'retry-timeouts', label: 'Just the 43 timeouts' },
+      ],
+    },
+  ],
+}
+
+// Second-level action responses
+const secondaryActions = {
+  'retry-all': 'On it. Retrying all 47 \u2014 43 with extended timeout, 4 with full payload re-delivery. I\u2019ll report back in a few minutes with results.',
+  'retry-timeouts': 'Retrying the 43 timeout events now. I\u2019ll hold the 4 malformed ones for your review \u2014 they may need manual payload inspection before re-delivery.',
 }
 
 const agentReplies = [
-  'Done. I\u2019ve queued those events for immediate retry \u2014 I\u2019ll flag any that fail again.',
-  'Got it. I\u2019ll monitor the endpoint and alert you if the error rate exceeds 5% again.',
-  'Updated. I\u2019ve extended the retry window to 12 hours for the affected batch.',
   'Checking on that now. Give me a moment to pull the latest data.',
-  'All clear on that front. No issues detected in the last hour.',
+  'Got it. I\u2019ll look into that and report back with what I find.',
+  'Let me cross-reference that against the delivery logs. One moment.',
+  'Running that query now. I\u2019ll have results in a few seconds.',
+  'I\u2019ll investigate and follow up with a recommendation.',
 ]
 
 function App() {
@@ -175,18 +223,36 @@ function App() {
   }, [addMessage])
 
   const handleAction = useCallback((action) => {
-    const response = actionResponses[action.id]
-    if (!response) return
-    setIsTyping(true)
-    setTimeout(() => {
-      setIsTyping(false)
-      addMessage({
-        id: (Date.now() + 1).toString(),
-        role: 'agent',
-        timestamp: new Date().toISOString(),
-        blocks: [{ type: 'text', content: response }],
-      })
-    }, 800 + Math.random() * 700)
+    // Check primary action responses (multi-block)
+    const blocks = actionResponses[action.id]
+    if (blocks) {
+      setIsTyping(true)
+      setTimeout(() => {
+        setIsTyping(false)
+        addMessage({
+          id: (Date.now() + 1).toString(),
+          role: 'agent',
+          timestamp: new Date().toISOString(),
+          blocks,
+        })
+      }, 900 + Math.random() * 800)
+      return
+    }
+
+    // Check secondary (single text)
+    const text = secondaryActions[action.id]
+    if (text) {
+      setIsTyping(true)
+      setTimeout(() => {
+        setIsTyping(false)
+        addMessage({
+          id: (Date.now() + 1).toString(),
+          role: 'agent',
+          timestamp: new Date().toISOString(),
+          blocks: [{ type: 'text', content: text }],
+        })
+      }, 800 + Math.random() * 600)
+    }
   }, [addMessage])
 
   return (
