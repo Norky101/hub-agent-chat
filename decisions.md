@@ -437,6 +437,20 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 
 **1. Real AI backend.** The mock responses are crafted to demonstrate the UI, but connecting to Claude's API via a Cloudflare Worker would make the conversation genuinely interactive. The component architecture already supports it — swap the `handleSend` mock for an API call and the blocks render the same way.
 
+---
+
+## 41. Multi-Chat Mission Control
+
+**Decision:** Support multiple simultaneous chat sessions with a Mission Control overlay (blurred grid of conversation cards). Click any card to switch, Cmd/Ctrl+K or grid icon to toggle the overview. Each session has independent messages, typing state, and alert timers.
+
+**Why:** Real business users don't work on one problem at a time. You might be investigating a GitHub incident in one thread and checking Stripe health in another. Forcing everything into a single conversation (like ChatGPT's model) means losing context when you switch topics. The Mission Control pattern — inspired by macOS Exposé — lets you see all your conversations at a glance and jump between them instantly. Nobody in the AI chat space does multi-session overview.
+
+**Implementation:** App.jsx manages an array of session objects, each with its own message array and state. The active session renders in ChatWindow; others are preserved in memory. MissionControl.jsx renders the grid overlay with frosted-glass backdrop.
+
+**Alternatives considered:** Sidebar with conversation list (ChatGPT pattern — works but takes permanent screen space). Tabs (too many sessions gets cluttered). The overlay approach uses zero permanent space and works well on both desktop and mobile.
+
+# What I'd Do Differently With More Time
+
 **2. Streaming responses.** Agent text should appear word-by-word, not all at once after a typing indicator. This is how real AI products feel responsive. The block-based message model supports this — stream text into the first block, then render subsequent blocks (metric, table) once complete.
 
 **3. Data freshness indicators.** Show "Updated 12s ago" next to the metric card and table with a refresh button. Business users' #1 concern is whether they're looking at stale data.
