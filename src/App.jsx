@@ -345,6 +345,7 @@ function App() {
   const [sessions, setSessions] = useState([createSession(initialMessages)])
   const [activeId, setActiveId] = useState(sessions[0].id)
   const [showMC, setShowMC] = useState(false)
+  const [unreadIds, setUnreadIds] = useState(new Set())
 
   const session = sessions.find(s => s.id === activeId) || sessions[0]
 
@@ -363,6 +364,7 @@ function App() {
           ? { ...s, alertFired: true, messages: [...s.messages, { ...proactiveAlert, timestamp: new Date().toISOString() }] }
           : s
       ))
+      if (document.hidden) setUnreadIds(prev => new Set(prev).add(activeId))
     }, 45000)
     return () => clearTimeout(timer)
   }, [activeId, session.alertFired])
@@ -383,6 +385,9 @@ function App() {
 
   const addMessage = useCallback((msg) => {
     updateSession(activeId, s => ({ ...s, messages: [...s.messages, msg] }))
+    if (msg.role === 'agent' && document.hidden) {
+      setUnreadIds(prev => new Set(prev).add(activeId))
+    }
   }, [activeId, updateSession])
 
   const setTyping = useCallback((val) => {
@@ -450,7 +455,8 @@ function App() {
         visible={showMC}
         sessions={sessions}
         activeId={activeId}
-        onSelect={(id) => { setActiveId(id); setShowMC(false) }}
+        unreadIds={unreadIds}
+        onSelect={(id) => { setActiveId(id); setShowMC(false); setUnreadIds(prev => { const next = new Set(prev); next.delete(id); return next }) }}
         onNew={handleNewChat}
         onClose={() => setShowMC(false)}
       />

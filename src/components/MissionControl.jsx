@@ -57,6 +57,17 @@ const styles = {
     fontWeight: 500,
     color: '#f8f7f4',
     fontFamily: theme.fonts.sans,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    background: theme.colors.accent,
+    flexShrink: 0,
+    boxShadow: '0 0 6px rgba(79,110,247,0.4)',
   },
   cardPreview: {
     fontSize: 12,
@@ -132,7 +143,7 @@ function formatTime(ts) {
   return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 }
 
-function Card({ session, onClick }) {
+function Card({ session, onClick, hasUnread }) {
   const [hovered, setHovered] = useState(false)
   return (
     <div
@@ -141,7 +152,10 @@ function Card({ session, onClick }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div style={styles.cardTitle}>{getSessionTitle(session)}</div>
+      <div style={styles.cardTitle}>
+        {hasUnread && <span style={styles.unreadDot} />}
+        {getSessionTitle(session)}
+      </div>
       <div style={styles.cardPreview}>{getPreview(session)}</div>
       <div style={styles.cardMeta}>
         {session.messages.length} messages · {formatTime(session.createdAt)}
@@ -165,7 +179,7 @@ function NewCard({ onClick }) {
   )
 }
 
-export default function MissionControl({ visible, sessions, activeId, onSelect, onNew, onClose }) {
+export default function MissionControl({ visible, sessions, activeId, unreadIds, onSelect, onNew, onClose }) {
   return (
     <div style={styles.overlay(visible)} onClick={onClose}>
       <div onClick={e => e.stopPropagation()}>
@@ -175,7 +189,7 @@ export default function MissionControl({ visible, sessions, activeId, onSelect, 
         </div>
         <div style={styles.grid}>
           {sessions.map(s => (
-            <Card key={s.id} session={s} onClick={() => onSelect(s.id)} />
+            <Card key={s.id} session={s} onClick={() => onSelect(s.id)} hasUnread={unreadIds?.has(s.id)} />
           ))}
           <NewCard onClick={onNew} />
         </div>
