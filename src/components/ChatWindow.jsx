@@ -3,6 +3,7 @@ import theme from '../theme.js'
 import MessageBubble from './MessageBubble.jsx'
 import WelcomeScreen from './WelcomeScreen.jsx'
 import InputBar from './InputBar.jsx'
+import HubLogo from './HubLogo.jsx'
 
 const STYLES = `
   @keyframes fadeUp {
@@ -52,12 +53,6 @@ const styles = {
     gap: 8,
     marginBottom: 4,
   },
-  agentDot: {
-    width: 6,
-    height: 6,
-    borderRadius: '50%',
-    background: theme.colors.accent,
-  },
   agentLabel: {
     fontSize: 12,
     fontWeight: 500,
@@ -79,13 +74,7 @@ const styles = {
     opacity: 0,
     animation: 'fadeUp 0.3s ease forwards',
   },
-  typingLogo: {
-    width: 20,
-    height: 20,
-    borderRadius: '50%',
-    background: theme.colors.accent,
-    animation: 'logoPulse 1.8s ease-in-out infinite',
-  },
+  typingLogo: {},
   typingLabel: {
     fontSize: 13,
     color: theme.colors.textMuted,
@@ -148,7 +137,7 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
         ) : (
           <div style={styles.messages}>
             <div style={styles.agentId}>
-              <div style={styles.agentDot} />
+              <HubLogo size={18} />
               <span style={styles.agentLabel}>Hub Agent</span>
             </div>
             {items.map((item) => {
@@ -157,7 +146,7 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
             })}
             {isTyping && (
               <div style={styles.typingRow}>
-                <div style={styles.typingLogo} />
+                <HubLogo size={20} animate />
                 <span style={styles.typingLabel}>Thinking...</span>
               </div>
             )}

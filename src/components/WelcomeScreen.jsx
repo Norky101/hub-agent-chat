@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import theme from '../theme.js'
+import HubLogo from './HubLogo.jsx'
 
 const prompts = [
   'Show me overnight event volume',
@@ -9,7 +10,7 @@ const prompts = [
 
 const styles = {
   wrapper: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 80px' },
-  mark: { width: 48, height: 48, borderRadius: '50%', background: theme.colors.accent, marginBottom: 32, opacity: 0.9 },
+  mark: { marginBottom: 32 },
   title: { fontSize: 24, fontWeight: 500, color: theme.colors.text, fontFamily: theme.fonts.sans, letterSpacing: '-0.03em', marginBottom: 8 },
   subtitle: { fontSize: 15, color: theme.colors.textMuted, fontFamily: theme.fonts.sans, marginBottom: 44 },
   pills: { display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' },
@@ -28,7 +29,7 @@ export default function WelcomeScreen({ onSend }) {
   const [hovered, setHovered] = useState(null)
   return (
     <div style={styles.wrapper}>
-      <div style={styles.mark} />
+      <div style={styles.mark}><HubLogo size={56} /></div>
       <div style={styles.title}>Hub Agent</div>
       <div style={styles.subtitle}>Your webhook pipeline, managed</div>
       <div style={styles.pills}>
