@@ -244,3 +244,77 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 **Decision:** Treat every detail as if paying customers will see it tomorrow. No placeholder data, no "demo" shortcuts, no generic copy.
 
 **Why:** Aaron is evaluating whether this "looks like a product I'd ship." Startups ship with intention — every string, every number, every interaction tells a story. Generic data ("Client 1", "Status: Active") screams prototype. Specific, realistic data ("Shopify order webhook failed 3 retries") screams product.
+
+---
+
+## 26. Focus Fade — Older Messages Recede
+
+**Decision:** Apply progressive opacity to older messages. The last 2 messages stay at full opacity, then each preceding message drops by 25% (0.75 → 0.50 → 0.30 minimum). Transitions smoothly over 0.6s as new messages arrive.
+
+**Why:** In a data-heavy conversation with metric cards, tables, and text blocks, everything competes for attention equally. The user's eye doesn't know where to land. Focus fade creates an automatic visual hierarchy — the current exchange is in focus, the history recedes. This is a pattern from film and photography (depth of field) applied to a chat interface. Nobody in the AI chat space does this.
+
+**Alternatives considered:** Static opacity (no transition) — felt jarring when new messages arrived. Blur instead of opacity — too heavy, made old messages feel broken rather than secondary. Hiding old messages entirely — loses context, users need to scroll back.
+
+---
+
+## 27. Inline Trust Signals (Source Tags)
+
+**Decision:** Small color-coded tags next to data claims showing provenance: "LIVE" (green, real-time pipeline data), "FROM LOGS" (gray, historical), "CALCULATED" (blue, model-derived), "STATUS PAGE" (amber, external source).
+
+**Why:** MIT research shows AI models are 34% more likely to use confident language when hallucinating. Every AI chat product presents all answers identically — no visual distinction between facts from your database and model-generated estimates. Inline trust at the claim level is the #1 gap in the industry that nobody has shipped. This is a small UI element with outsized impact on user trust.
+
+**Alternatives considered:** Footnote-style citations (users ignore them). Confidence percentages (binary high/low tested better in enterprise research). Generic disclaimers ("AI can make mistakes" — becomes invisible within days).
+
+---
+
+## 28. Collapsible Reasoning Trail
+
+**Decision:** A "How I got here" toggle under agent analysis messages that expands to show the investigation steps: queried logs → detected failures → cross-referenced status API → analyzed patterns → checked history.
+
+**Why:** Enterprise users need to know whether to trust an answer. Showing the actual investigation steps (not a fake chain-of-thought) lets users verify the process without reading the full output. Collapsible so it doesn't clutter the conversation for users who trust the agent. This addresses the transparency gap — users can see what the agent did, not just what it concluded.
+
+**Alternatives considered:** Always-visible reasoning (too noisy). No reasoning (opaque, hurts trust). Step-by-step streaming (more complex, not needed for a demo).
+
+---
+
+## 29. Contextual Follow-Up Suggestions
+
+**Decision:** After key agent messages, show 2-3 clickable pill buttons suggesting logical next questions ("What about the other providers?" / "Show me the last 7 days trend" / "Set up an alert"). Clicking sends the suggestion as a user message.
+
+**Why:** The #1 problem in AI chat is the blank page — users don't know what to ask next. Over 50% of adults lack the writing skills to effectively prompt LLMs. Contextual follow-ups solve this by guiding users to the logical next step. They're also a product instinct signal — a sharp colleague doesn't just answer your question, they anticipate what you'll want to know next.
+
+**Alternatives considered:** Static suggestion list (not contextual, quickly ignored). Auto-sending the next message (too aggressive, removes user control).
+
+---
+
+## 30. Bold Text Rendering for Key Data Points
+
+**Decision:** Support `**markdown bold**` syntax in agent text blocks. Key numbers, statuses, and action items are rendered at fontWeight 600. Applied selectively to: event counts, error codes, time durations, status names, and recommendations.
+
+**Why:** A wall of 15px text is hard to scan. Business users glance at agent responses — they don't read every word. Bold keywords let them extract the critical information (503, 47 events, 6 hours) in a single scan. This is how real monitoring dashboards present alert text. Simple renderText() function splits on `**` markers, no markdown library needed.
+
+---
+
+## 31. Gibberish Input Handling
+
+**Decision:** Agent checks user input against webhook/provider keywords. Relevant input gets a contextual "checking on that" response with realistic typing delay. Gibberish gets an honest "I'm not sure what you're asking" with follow-up suggestions to get back on track, delivered fast (500ms, no fake thinking).
+
+**Why:** A sharp colleague doesn't pretend to work on nonsense. The previous behavior — random canned replies to any input — broke immersion immediately. An honest admission of confusion plus helpful suggestions is what a real agent would do. The fast response time for gibberish is intentional — the agent isn't "thinking" about nothing.
+
+---
+
+## 32. Interactive Data — Expandable Tables and Metric Cards
+
+**Decision:** Table rows and metric cards are clickable. Click a provider row → expands to show endpoints, success rate, latency, last event. Click the metric card → expands to show delivered/failed/retried counts, peak hour, avg/P99 latency. Expanded rows show warning-colored values for degraded providers.
+
+**Why:** The spec says "render a data table" — it doesn't say static. A sharp colleague presents data you can drill into, not a flat dump. This is the core product instinct differentiator: the conversation is a workspace where data invites exploration, not a transcript you passively read. Nobody in the AI chat industry does inline data drill-down within the conversation thread.
+
+---
+
+## 33. Agent Reasoning and Remediation
+
+**Decision:** The agent doesn't just report problems — it diagnoses root causes, recommends specific remediation, and chains actions with follow-up results. "GitHub returning 503s" becomes "API gateway throttling under load, response times 200ms→12s, recommend retry with 30s timeout, 80% should recover."
+
+**Why:** Aaron "uses Claude agents all day." He knows the difference between an agent that reports and one that reasons. A sharp colleague identifies the problem, tells you why it's happening, suggests what to do, and offers to do it. The action buttons chain: "Show me the logs" → analysis → "Retry all 47" / "Just the 43 timeouts" — each producing specific, contextual follow-through.
+
+**Alternatives considered:** Simple data display with separate "ask me to fix it" flow. But that's two interactions for what should be one — see the problem, understand it, fix it, all in the same thread.
