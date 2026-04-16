@@ -4,7 +4,7 @@ import theme from '../theme.js'
 const isDesktop = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
 
 const styles = {
-  outer: { padding: '0 24px 24px', width: '100%', maxWidth: 680, margin: '0 auto' },
+  outer: { padding: '0 16px 16px', paddingBottom: 'max(16px, env(safe-area-inset-bottom))', width: '100%', maxWidth: 680, margin: '0 auto' },
   container: (focused) => ({
     background: theme.colors.surface,
     border: `1px solid ${focused ? theme.colors.accent : theme.colors.border}`,

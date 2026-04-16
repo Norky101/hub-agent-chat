@@ -4,7 +4,7 @@ import theme from '../theme.js'
 const styles = {
   row: { display: 'flex', flexWrap: 'wrap', gap: 10 },
   btn: (hovered, clicked) => ({
-    fontFamily: theme.fonts.sans, fontSize: 14, fontWeight: 400, padding: '9px 18px',
+    fontFamily: theme.fonts.sans, fontSize: 14, fontWeight: 400, padding: '11px 18px', minHeight: 44,
     borderRadius: theme.radius.pill,
     border: `1px solid ${clicked ? theme.colors.accent : hovered ? theme.colors.borderStrong : theme.colors.border}`,
     background: clicked ? theme.colors.accentSoft : hovered ? theme.colors.surfaceHover : 'transparent',

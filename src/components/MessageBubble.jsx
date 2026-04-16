@@ -14,7 +14,7 @@ const styles = {
     transition: 'opacity 0.3s ease',
   }),
   agentContent: {
-    maxWidth: 560,
+    maxWidth: '100%',
     display: 'flex',
     flexDirection: 'column',
     gap: 16,
