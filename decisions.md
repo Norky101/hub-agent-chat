@@ -382,3 +382,23 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 **Why:** Safari/iOS silently fails when you call `start()` on a SpeechRecognition object that has already fired `onend`. Chrome allows reuse, Safari doesn't. This manifested as "mic works once then stops." The fix creates a new instance each time, wrapped in try/catch for edge cases where the previous instance hasn't fully cleaned up.
 
 **Alternatives considered:** Detecting Safari and applying a workaround (fragile, user-agent sniffing is unreliable). Creating new instances on every toggle works universally across all browsers.
+
+---
+
+# What I'd Do Differently With More Time
+
+**1. Real AI backend.** The mock responses are crafted to demonstrate the UI, but connecting to Claude's API via a Cloudflare Worker would make the conversation genuinely interactive. The component architecture already supports it — swap the `handleSend` mock for an API call and the blocks render the same way.
+
+**2. Streaming responses.** Agent text should appear word-by-word, not all at once after a typing indicator. This is how real AI products feel responsive. The block-based message model supports this — stream text into the first block, then render subsequent blocks (metric, table) once complete.
+
+**3. Data freshness indicators.** Show "Updated 12s ago" next to the metric card and table with a refresh button. Business users' #1 concern is whether they're looking at stale data.
+
+**4. Persistent conversation history.** Store conversations in localStorage or a D1 database (reusing the Cloudflare infrastructure from Part 1). The "New chat" button would add to a list, and a sidebar could show past sessions.
+
+**5. Agent work-in-progress visibility.** Instead of "Thinking...", show what the agent is doing: "Searching delivery logs..." → "Analyzing 47 failures..." → "Cross-referencing GitHub status..." — then the answer. Makes the wait productive.
+
+**6. Accessibility audit.** ARIA labels on interactive elements, keyboard navigation for expandable rows, screen reader testing. The basics are in place (semantic HTML, button elements) but a full audit would catch gaps.
+
+**7. Visual polish iteration.** The UI is clean but could be more distinctive. The tension between the spec's light color palette and the premium dark references we explored is worth revisiting — possibly offering a theme toggle, or pushing the light palette harder with more intentional color use on data elements.
+
+**8. Error boundaries.** React error boundaries around each message block so a malformed metric or table doesn't crash the entire conversation. Graceful degradation — show the text blocks and skip the broken one.
