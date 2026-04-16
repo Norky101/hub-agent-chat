@@ -128,9 +128,9 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
     if (prev && timeDiff > 300000) items.push({ type: 'separator', key: `sep-${i}` })
     const shouldAnimate = mountedAt && new Date(msg.timestamp) > new Date(mountedAt)
 
-    // Focus fade: last 3 messages full opacity, then gradient down
+    // Focus fade: last 2 messages full opacity, then drop noticeably
     const distFromEnd = totalMessages - 1 - i
-    const focusOpacity = distFromEnd <= 2 ? 1 : Math.max(0.4, 1 - (distFromEnd - 2) * 0.15)
+    const focusOpacity = distFromEnd <= 1 ? 1 : Math.max(0.3, 1 - (distFromEnd - 1) * 0.25)
 
     items.push({ type: 'message', message: { ...msg, showMeta }, animate: shouldAnimate, key: msg.id, focusOpacity })
   })
