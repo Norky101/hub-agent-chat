@@ -198,6 +198,68 @@ const keywords = /\b(shopify|stripe|github|twilio|sendgrid|webhook|event|endpoin
 
 // Specific responses for follow-up suggestions and common queries
 const queryResponses = {
+  'show me overnight event volume': {
+    blocks: [
+      { type: 'text', content: 'Here\u2019s your overnight pipeline activity:', source: 'live' },
+      {
+        type: 'metric',
+        data: {
+          label: 'Events Processed',
+          value: '24.8K',
+          trend: 18,
+          positive: true,
+          period: 'last 24 hours',
+          sparkline: [180, 210, 195, 240, 220, 260, 310, 290, 340, 248],
+          breakdown: [
+            { label: 'Delivered', value: '24,312' },
+            { label: 'Failed', value: '488' },
+            { label: 'Retried', value: '47' },
+            { label: 'Peak Hour', value: '2:00 AM' },
+            { label: 'Avg Latency', value: '134ms' },
+            { label: 'P99 Latency', value: '890ms' },
+          ],
+        },
+      },
+      { type: 'text', content: 'Volume is up **18%** compared to the same period last week. Peak traffic hit at **2:00 AM** \u2014 that\u2019s Shopify\u2019s nightly order sync. **488 failures** total, but most self-healed via auto-retry. The **47 still in queue** are all from GitHub.' },
+    ],
+    followUps: ['What\u2019s wrong with GitHub?', 'Show me the last 7 days trend', 'Break down by provider'],
+  },
+  'which providers are failing': {
+    blocks: [
+      { type: 'text', content: 'One provider has active failures right now:', source: 'live' },
+      {
+        type: 'table',
+        data: {
+          columns: [
+            { key: 'provider', label: 'Provider', type: 'name' },
+            { key: 'status', label: 'Health', type: 'status' },
+            { key: 'failures', label: 'Failures', align: 'right' },
+          ],
+          rows: [
+            { provider: 'GitHub', status: 'Degraded', failures: '47 active' },
+            { provider: 'Shopify', status: 'Healthy', failures: '0' },
+            { provider: 'Stripe', status: 'Healthy', failures: '0' },
+            { provider: 'Twilio', status: 'Healthy', failures: '0' },
+            { provider: 'SendGrid', status: 'Healthy', failures: '0' },
+          ],
+        },
+      },
+      { type: 'text', content: '**GitHub** is the only issue. Their push event endpoint has been returning **503s** for about 45 minutes. **47 events** are in the retry queue. The other four providers are clean \u2014 Shopify and Stripe had minor transient failures overnight but all recovered via auto-retry.' },
+    ],
+    reasoning: [
+      'Queried active failure counts across all 5 providers',
+      'Filtered for unresolved failures (not auto-recovered)',
+      'Identified GitHub as the only provider with active issues',
+    ],
+    followUps: ['Handle the GitHub failures', 'Show me GitHub error details', 'Set up failure alerts'],
+  },
+  'retry all failed stripe events': {
+    blocks: [
+      { type: 'text', content: 'Stripe actually has **zero active failures** right now. There were **4 transient failures** overnight \u2014 all caused by webhook signature mismatches (likely clock skew between servers). All 4 were successfully re-delivered on the second attempt.', source: 'logs' },
+      { type: 'text', content: 'No action needed on Stripe. If you\u2019re seeing issues on your end, I can pull the detailed delivery logs for the last 24 hours.' },
+    ],
+    followUps: ['Show Stripe delivery logs', 'Which provider does have failures?', 'Pipeline overview'],
+  },
   'what about the other providers?': {
     blocks: [
       { type: 'text', content: 'The other four are running clean. **Shopify** is your highest volume at **12,340 events** with a **99.8%** delivery rate. **Stripe** is close behind at **8,204** and **99.9%** \u2014 essentially flawless. **Twilio** and **SendGrid** are low volume but both at **100%** delivery.', source: 'live' },
@@ -396,6 +458,7 @@ function App() {
     setMessages([])
     setIsTyping(false)
     mountedAt.current = new Date().toISOString()
+    alertFired.current = false
   }, [])
 
   const handleSend = useCallback((text) => {

@@ -123,7 +123,7 @@ function getPlainText(blocks) {
     .join('\n\n')
 }
 
-export default function MessageBubble({ message, onAction, onSend, animate, scrollContainerRef }) {
+export default function MessageBubble({ message, onAction, onSend, animate, mountDelay, scrollContainerRef }) {
   const isUser = message.role === 'user'
   const { ref, opacity } = useViewportFade(scrollContainerRef)
   const [hovered, setHovered] = useState(false)
@@ -139,7 +139,9 @@ export default function MessageBubble({ message, onAction, onSend, animate, scro
 
   const animStyle = animate
     ? { opacity: 0, animation: 'fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' }
-    : { opacity }
+    : mountDelay > 0
+      ? { opacity: 0, animation: `mountFade 0.5s ease ${mountDelay}ms forwards` }
+      : { opacity }
 
   if (isUser) {
     return (

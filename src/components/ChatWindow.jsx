@@ -10,6 +10,10 @@ const STYLES = `
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
+  @keyframes mountFade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   @keyframes typing {
     0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
     30% { opacity: 0.7; transform: translateY(-3px); }
@@ -162,9 +166,10 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, onNew
     // Show timestamp on first message, role changes with >10s gap, or >5min gaps
     const showMeta = !prev || (prev.role !== msg.role && timeDiff > 10000) || timeDiff > 300000
     if (prev && timeDiff > 300000) items.push({ type: 'separator', key: `sep-${i}` })
-    const shouldAnimate = mountedAt && new Date(msg.timestamp) > new Date(mountedAt)
+    const isNew = mountedAt && new Date(msg.timestamp) > new Date(mountedAt)
+    const mountDelay = !isNew ? i * 100 : 0
 
-    items.push({ type: 'message', message: { ...msg, showMeta }, animate: shouldAnimate, key: msg.id })
+    items.push({ type: 'message', message: { ...msg, showMeta }, animate: isNew, mountDelay, key: msg.id })
   })
 
   return (
@@ -196,7 +201,7 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, onNew
             </div>
             {items.map((item) => {
               if (item.type === 'separator') return <div key={item.key} style={styles.separator} />
-              return <MessageBubble key={item.key} message={item.message} onAction={onAction} onSend={onSend} animate={item.animate} scrollContainerRef={scrollRef} />
+              return <MessageBubble key={item.key} message={item.message} onAction={onAction} onSend={onSend} animate={item.animate} mountDelay={item.mountDelay} scrollContainerRef={scrollRef} />
             })}
             {isTyping && (
               <div style={styles.typingRow}>
