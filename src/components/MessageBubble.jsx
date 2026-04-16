@@ -9,7 +9,7 @@ const styles = {
     justifyContent: isUser ? 'flex-end' : 'flex-start',
     padding: '2px 0',
     opacity: animate ? 0 : 1,
-    animation: animate ? `fadeUp 0.4s ${theme.transition.smooth.split(' ').slice(1).join(' ')} forwards` : 'none',
+    animation: animate ? `fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards` : 'none',
   }),
   agentContent: {
     maxWidth: '100%',
@@ -18,12 +18,13 @@ const styles = {
     gap: 16,
   },
   agentText: {
-    fontSize: 15,
-    lineHeight: 1.7,
+    fontSize: 16,
+    lineHeight: 1.75,
     fontFamily: theme.fonts.sans,
     fontWeight: 400,
     color: theme.colors.text,
-    letterSpacing: '0.01em',
+    letterSpacing: '0.005em',
+    maxWidth: 600,
   },
   userPill: {
     fontSize: 15,
@@ -32,18 +33,20 @@ const styles = {
     fontWeight: 400,
     color: theme.colors.userText,
     background: theme.colors.userBubble,
-    padding: '10px 18px',
-    borderRadius: '20px 20px 4px 20px',
-    maxWidth: '75%',
+    padding: '12px 20px',
+    borderRadius: '22px 22px 6px 22px',
+    maxWidth: '70%',
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
   },
   timestamp: {
     fontSize: 11,
     color: theme.colors.textFaint,
     fontFamily: theme.fonts.sans,
-    marginTop: 4,
-    letterSpacing: '0.02em',
+    marginTop: 6,
+    letterSpacing: '0.03em',
+    fontVariantNumeric: 'tabular-nums',
   },
 }
 
@@ -58,9 +61,7 @@ export default function MessageBubble({ message, onAction, animate }) {
     return (
       <div style={styles.row(true, animate)}>
         <div>
-          <div style={styles.userPill}>
-            {message.blocks[0]?.content}
-          </div>
+          <div style={styles.userPill}>{message.blocks[0]?.content}</div>
           {message.showMeta && (
             <div style={{ ...styles.timestamp, textAlign: 'right' }}>
               {formatTime(message.timestamp)}

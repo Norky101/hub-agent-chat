@@ -2,21 +2,17 @@ import { useState } from 'react'
 import theme from '../theme.js'
 
 const statusMap = {
-  Healthy: { color: theme.colors.green, bg: theme.colors.greenSoft },
-  Degraded: { color: theme.colors.amber, bg: theme.colors.amberSoft },
-  Down: { color: theme.colors.red, bg: theme.colors.redSoft },
-  Paid: { color: theme.colors.green, bg: theme.colors.greenSoft },
-  Pending: { color: theme.colors.amber, bg: theme.colors.amberSoft },
-  Overdue: { color: theme.colors.red, bg: theme.colors.redSoft },
+  Healthy: { color: theme.colors.green, bg: theme.colors.greenSoft, dot: theme.colors.green },
+  Degraded: { color: theme.colors.amber, bg: theme.colors.amberSoft, dot: theme.colors.amber },
+  Down: { color: theme.colors.red, bg: theme.colors.redSoft, dot: theme.colors.red },
 }
 
 const styles = {
   wrapper: {
+    ...theme.glass,
     borderRadius: theme.radius.lg,
-    border: `1px solid ${theme.colors.border}`,
-    background: theme.colors.surface,
     overflow: 'auto',
-    maxWidth: 520,
+    maxWidth: 540,
     WebkitOverflowScrolling: 'touch',
   },
   table: {
@@ -27,56 +23,64 @@ const styles = {
   },
   th: (align) => ({
     textAlign: align || 'left',
-    padding: '10px 16px',
-    fontSize: 11,
+    padding: '12px 20px',
+    fontSize: 10,
     fontWeight: 500,
-    color: theme.colors.textMuted,
+    color: theme.colors.textFaint,
     textTransform: 'uppercase',
-    letterSpacing: '0.06em',
+    letterSpacing: '0.1em',
     borderBottom: `1px solid ${theme.colors.border}`,
   }),
   row: (hovered, isLast) => ({
     borderBottom: isLast ? 'none' : `1px solid ${theme.colors.border}`,
-    background: hovered ? 'rgba(0, 0, 0, 0.012)' : 'transparent',
+    background: hovered ? 'rgba(79, 110, 247, 0.02)' : 'transparent',
     transition: `background ${theme.transition.fast}`,
   }),
   td: (align) => ({
-    padding: '12px 16px',
+    padding: '14px 20px',
     color: theme.colors.text,
     textAlign: align || 'left',
-    height: 44,
     verticalAlign: 'middle',
   }),
   tdMono: {
-    padding: '12px 16px',
+    padding: '14px 20px',
     color: theme.colors.textSecondary,
     fontFamily: theme.fonts.mono,
     fontSize: 13,
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
-    height: 44,
     verticalAlign: 'middle',
   },
   name: { fontWeight: 500 },
   badge: (status) => {
-    const s = statusMap[status] || { color: theme.colors.textMuted, bg: theme.colors.accentSoft }
+    const s = statusMap[status] || { color: theme.colors.textMuted, bg: 'transparent', dot: theme.colors.textFaint }
     return {
-      fontSize: 11,
+      fontSize: 12,
       fontWeight: 500,
-      padding: '2px 10px',
-      borderRadius: theme.radius.pill,
       color: s.color,
-      background: s.bg,
-      display: 'inline-block',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+    }
+  },
+  dot: (status) => {
+    const s = statusMap[status] || { dot: theme.colors.textFaint }
+    return {
+      width: 6,
+      height: 6,
+      borderRadius: '50%',
+      background: s.dot,
+      flexShrink: 0,
     }
   },
   footer: {
-    padding: '8px 16px',
+    padding: '10px 20px',
     fontSize: 11,
     color: theme.colors.textFaint,
     borderTop: `1px solid ${theme.colors.border}`,
     textAlign: 'right',
     fontFamily: theme.fonts.sans,
+    letterSpacing: '0.02em',
   },
 }
 
@@ -87,7 +91,16 @@ function Row({ row, columns, isLast }) {
       {columns.map((col, ci) => {
         const val = row[col.key]
         if (col.align === 'right') return <td key={ci} style={styles.tdMono}>{val}</td>
-        if (col.type === 'status') return <td key={ci} style={styles.td()}><span style={styles.badge(val)}>{val}</span></td>
+        if (col.type === 'status') {
+          return (
+            <td key={ci} style={styles.td()}>
+              <span style={styles.badge(val)}>
+                <span style={styles.dot(val)} />
+                {val}
+              </span>
+            </td>
+          )
+        }
         if (col.type === 'name') return <td key={ci} style={{ ...styles.td(), ...styles.name }}>{val}</td>
         return <td key={ci} style={styles.td(col.align)}>{val}</td>
       })}

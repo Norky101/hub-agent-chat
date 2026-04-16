@@ -3,68 +3,71 @@ import theme from '../theme.js'
 
 const styles = {
   card: (hovered) => ({
-    background: theme.colors.surface,
-    border: `1px solid ${theme.colors.border}`,
+    ...theme.glass,
     borderRadius: theme.radius.lg,
-    padding: '20px 24px',
+    padding: '24px 28px',
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 20,
-    maxWidth: 360,
-    transition: `box-shadow ${theme.transition.base}`,
-    boxShadow: hovered ? '0 4px 12px rgba(0,0,0,0.04)' : 'none',
+    maxWidth: 380,
+    transition: `all ${theme.transition.base}`,
+    boxShadow: hovered
+      ? '0 8px 32px rgba(79, 110, 247, 0.08), 0 2px 8px rgba(0,0,0,0.03)'
+      : theme.glass.boxShadow,
+    transform: hovered ? 'translateY(-1px)' : 'none',
   }),
   left: {
     display: 'flex',
     flexDirection: 'column',
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 500,
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.sans,
-    letterSpacing: '0.06em',
+    letterSpacing: '0.08em',
     textTransform: 'uppercase',
   },
   value: {
-    fontSize: 36,
+    fontSize: 42,
     fontWeight: 500,
     color: theme.colors.text,
     fontFamily: theme.fonts.sans,
-    lineHeight: 1.15,
-    letterSpacing: '-0.03em',
-    marginTop: 6,
+    lineHeight: 1.1,
+    letterSpacing: '-0.04em',
+    marginTop: 8,
   },
   period: {
     fontSize: 12,
     color: theme.colors.textFaint,
     fontFamily: theme.fonts.sans,
-    marginTop: 6,
+    marginTop: 8,
   },
   right: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-end',
-    gap: 10,
+    gap: 12,
     paddingTop: 4,
   },
   trend: (positive) => ({
     display: 'inline-flex',
     alignItems: 'center',
-    gap: 3,
-    fontSize: 12,
+    gap: 4,
+    fontSize: 13,
     fontWeight: 500,
     fontFamily: theme.fonts.mono,
     color: positive ? theme.colors.green : theme.colors.red,
     background: positive ? theme.colors.greenSoft : theme.colors.redSoft,
-    padding: '3px 10px',
+    padding: '4px 12px',
     borderRadius: theme.radius.pill,
+    letterSpacing: '0.02em',
   }),
 }
 
 function Sparkline({ data, positive }) {
-  const w = 80, h = 28, pad = 2
+  const w = 90, h = 32, pad = 2
   const min = Math.min(...data), max = Math.max(...data)
   const range = max - min || 1
   const color = positive ? theme.colors.green : theme.colors.red
@@ -80,13 +83,13 @@ function Sparkline({ data, positive }) {
   return (
     <svg width={w} height={h} style={{ display: 'block' }}>
       <defs>
-        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity={0.12} />
+        <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.15} />
           <stop offset="100%" stopColor={color} stopOpacity={0} />
         </linearGradient>
       </defs>
+      <polygon points={`${pad},${h} ${points} ${w - pad},${h}`} fill="url(#sparkFill)" />
       <polyline points={points} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-      <polygon points={`${pad},${h} ${points} ${w - pad},${h}`} fill="url(#sparkGrad)" />
     </svg>
   )
 }

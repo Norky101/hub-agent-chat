@@ -3,37 +3,40 @@ import theme from '../theme.js'
 
 const styles = {
   outer: {
-    padding: '0 24px 24px',
+    padding: '0 24px 28px',
     width: '100%',
     maxWidth: 680,
     margin: '0 auto',
   },
   container: (focused) => ({
-    background: theme.colors.surface,
-    border: `1px solid ${focused ? theme.colors.borderStrong : theme.colors.border}`,
+    ...theme.glass,
     borderRadius: theme.radius.xl,
-    padding: '14px 16px 10px 20px',
+    padding: '16px 18px 12px 22px',
     display: 'flex',
     flexDirection: 'column',
     gap: 8,
-    transition: `border-color ${theme.transition.base}, box-shadow ${theme.transition.base}`,
+    transition: `all ${theme.transition.base}`,
     boxShadow: focused
-      ? '0 0 0 3px rgba(79, 110, 247, 0.06), 0 4px 16px rgba(0,0,0,0.04)'
-      : '0 2px 8px rgba(0,0,0,0.03)',
+      ? '0 0 0 3px rgba(79, 110, 247, 0.06), 0 8px 32px rgba(0, 0, 0, 0.04)'
+      : '0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02)',
+    border: focused
+      ? '1px solid rgba(79, 110, 247, 0.2)'
+      : theme.glass.border,
   }),
   textarea: {
     border: 'none',
     outline: 'none',
     background: 'transparent',
     fontFamily: theme.fonts.sans,
-    fontSize: 15,
-    lineHeight: '24px',
+    fontSize: 16,
+    lineHeight: '26px',
     color: theme.colors.text,
     resize: 'none',
     padding: 0,
     maxHeight: 140,
     overflow: 'auto',
     width: '100%',
+    letterSpacing: '0.005em',
   },
   toolbar: {
     display: 'flex',
@@ -45,14 +48,9 @@ const styles = {
     alignItems: 'center',
     gap: 2,
   },
-  toolRight: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4,
-  },
   iconBtn: (active) => ({
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     borderRadius: theme.radius.sm,
     border: 'none',
     background: active ? theme.colors.accentSoft : 'transparent',
@@ -60,26 +58,28 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: `background ${theme.transition.fast}`,
-    color: active ? theme.colors.accent : theme.colors.textFaint,
+    transition: `all ${theme.transition.fast}`,
   }),
   sendBtn: (canSend) => ({
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     borderRadius: theme.radius.sm,
     border: 'none',
-    background: canSend ? theme.colors.text : 'transparent',
+    background: canSend
+      ? 'linear-gradient(135deg, #4F6EF7, #6B5CF7)'
+      : 'transparent',
     cursor: canSend ? 'pointer' : 'default',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: `all ${theme.transition.fast}`,
+    transition: `all ${theme.transition.base}`,
+    boxShadow: canSend ? '0 2px 8px rgba(79, 110, 247, 0.25)' : 'none',
   }),
 }
 
 function MicIcon({ color }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <rect x="9" y="1" width="6" height="12" rx="3" />
       <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
       <line x1="12" y1="18" x2="12" y2="22" />
@@ -90,7 +90,7 @@ function MicIcon({ color }) {
 
 function SendIcon({ canSend }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={canSend ? theme.colors.bg : theme.colors.textFaint} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={canSend ? '#fff' : theme.colors.textFaint} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <line x1="12" y1="19" x2="12" y2="5" />
       <polyline points="5 12 12 5 19 12" />
     </svg>
@@ -124,7 +124,6 @@ export default function InputBar({ onSend, speechSupported, isListening, onToggl
     }
   }
 
-  // Expose for speech recognition
   InputBar.setValue = setValue
 
   return (
@@ -141,7 +140,7 @@ export default function InputBar({ onSend, speechSupported, isListening, onToggl
           onKeyDown={handleKeyDown}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder={isListening ? 'Listening...' : 'Ask anything...'}
+          placeholder={isListening ? 'Listening...' : 'Ask about your webhooks...'}
           style={styles.textarea}
         />
         <div style={styles.toolbar}>
@@ -152,11 +151,9 @@ export default function InputBar({ onSend, speechSupported, isListening, onToggl
               </button>
             )}
           </div>
-          <div style={styles.toolRight}>
-            <button type="submit" style={styles.sendBtn(canSend)} disabled={!canSend}>
-              <SendIcon canSend={canSend} />
-            </button>
-          </div>
+          <button type="submit" style={styles.sendBtn(canSend)} disabled={!canSend}>
+            <SendIcon canSend={canSend} />
+          </button>
         </div>
       </form>
     </div>
