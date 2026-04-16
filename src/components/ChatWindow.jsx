@@ -61,6 +61,28 @@ const styles = {
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
   },
+  newChatBtn: (hovered) => ({
+    position: 'fixed',
+    top: 20,
+    right: 24,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '8px 16px',
+    borderRadius: theme.radius.pill,
+    border: `1px solid ${hovered ? theme.colors.borderStrong : theme.colors.border}`,
+    background: hovered ? theme.colors.surface : 'rgba(255,255,255,0.6)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    cursor: 'pointer',
+    transition: `all ${theme.transition.base}`,
+    fontFamily: theme.fonts.sans,
+    fontSize: 13,
+    fontWeight: 400,
+    color: hovered ? theme.colors.text : theme.colors.textMuted,
+    zIndex: 20,
+    boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
+  }),
   separator: {
     width: '100%',
     height: 1,
@@ -102,10 +124,11 @@ const styles = {
   }),
 }
 
-export default function ChatWindow({ messages, isTyping, onSend, onAction, mountedAt, speechSupported, isListening, onToggleMic }) {
+export default function ChatWindow({ messages, isTyping, onSend, onAction, onNewChat, mountedAt, speechSupported, isListening, onToggleMic }) {
   const endRef = useRef(null)
   const scrollRef = useRef(null)
   const [showScroll, setShowScroll] = useState(false)
+  const [newChatHovered, setNewChatHovered] = useState(false)
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -131,6 +154,21 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
   return (
     <div style={styles.page}>
       <style>{STYLES}</style>
+
+      {messages.length > 0 && onNewChat && (
+        <button
+          style={styles.newChatBtn(newChatHovered)}
+          onMouseEnter={() => setNewChatHovered(true)}
+          onMouseLeave={() => setNewChatHovered(false)}
+          onClick={onNewChat}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>
+          New chat
+        </button>
+      )}
+
       <div className="chat-scroll" style={styles.content} ref={scrollRef} onScroll={onScrollHandler}>
         {messages.length === 0 ? (
           <WelcomeScreen onSend={onSend} />

@@ -221,6 +221,12 @@ function App() {
     setMessages((prev) => [...prev, msg])
   }, [])
 
+  const handleNewChat = useCallback(() => {
+    setMessages([])
+    setIsTyping(false)
+    mountedAt.current = new Date().toISOString()
+  }, [])
+
   const handleSend = useCallback((text) => {
     addMessage({
       id: Date.now().toString(),
@@ -289,6 +295,7 @@ function App() {
       isTyping={isTyping}
       onSend={handleSend}
       onAction={handleAction}
+      onNewChat={handleNewChat}
       mountedAt={mountedAt.current}
       speechSupported={speechSupported}
       isListening={isListening}
