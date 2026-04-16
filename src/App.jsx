@@ -32,6 +32,14 @@ const initialMessages = [
           positive: true,
           period: 'last 24 hours',
           sparkline: [180, 210, 195, 240, 220, 260, 310, 290, 340, 248],
+          breakdown: [
+            { label: 'Delivered', value: '24,312' },
+            { label: 'Failed', value: '488' },
+            { label: 'Retried', value: '47' },
+            { label: 'Peak Hour', value: '2:00 AM' },
+            { label: 'Avg Latency', value: '134ms' },
+            { label: 'P99 Latency', value: '890ms' },
+          ],
         },
       },
     ],
@@ -117,12 +125,18 @@ const initialMessages = [
   },
 ]
 
+const actionResponses = {
+  'retry-now': 'Retrying 47 failed GitHub events now. 43 are timeout errors \u2014 I\u2019ll increase the timeout to 30s for this batch. You\u2019ll get a summary once they\u2019re processed.',
+  'pause-endpoint': 'GitHub endpoint paused. Incoming events will buffer for up to 24 hours. I\u2019ll notify you when their status page reports recovery.',
+  'view-logs': 'Here\u2019s what I\u2019m seeing in the logs: 43 of 47 failures are 503 gateway timeouts (avg response time 12.4s). The other 4 returned malformed JSON. All originated from the push event webhook.',
+}
+
 const agentReplies = [
   'Done. I\u2019ve queued those events for immediate retry \u2014 I\u2019ll flag any that fail again.',
-  'Endpoint paused. Incoming GitHub events will buffer until you re-enable it.',
-  'Pulling the delivery logs now. 43 of the 47 failures are timeout errors, 4 are malformed responses.',
   'Got it. I\u2019ll monitor the endpoint and alert you if the error rate exceeds 5% again.',
   'Updated. I\u2019ve extended the retry window to 12 hours for the affected batch.',
+  'Checking on that now. Give me a moment to pull the latest data.',
+  'All clear on that front. No issues detected in the last hour.',
 ]
 
 function App() {
@@ -160,7 +174,20 @@ function App() {
     }, 1000 + Math.random() * 1200)
   }, [addMessage])
 
-  const handleAction = useCallback(() => {}, [])
+  const handleAction = useCallback((action) => {
+    const response = actionResponses[action.id]
+    if (!response) return
+    setIsTyping(true)
+    setTimeout(() => {
+      setIsTyping(false)
+      addMessage({
+        id: (Date.now() + 1).toString(),
+        role: 'agent',
+        timestamp: new Date().toISOString(),
+        blocks: [{ type: 'text', content: response }],
+      })
+    }, 800 + Math.random() * 700)
+  }, [addMessage])
 
   return (
     <ChatWindow

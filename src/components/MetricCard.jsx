@@ -2,19 +2,22 @@ import { useState } from 'react'
 import theme from '../theme.js'
 
 const styles = {
-  card: (hovered) => ({
+  card: (hovered, expanded) => ({
     background: theme.colors.surface,
-    border: `1px solid ${hovered ? theme.colors.borderStrong : theme.colors.border}`,
+    border: `1px solid ${expanded ? theme.colors.accent : hovered ? theme.colors.borderStrong : theme.colors.border}`,
     borderRadius: theme.radius.lg,
     borderBottom: `2px solid ${theme.colors.accent}`,
     padding: '22px 24px',
+    maxWidth: 420,
+    transition: `border-color ${theme.transition.base}`,
+    cursor: 'pointer',
+  }),
+  top: {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 20,
-    maxWidth: 380,
-    transition: `border-color ${theme.transition.base}`,
-  }),
+  },
   label: {
     fontSize: 11, fontWeight: 500, color: theme.colors.textMuted,
     fontFamily: theme.fonts.sans, letterSpacing: '0.08em', textTransform: 'uppercase',
@@ -32,6 +35,23 @@ const styles = {
     padding: '3px 10px', borderRadius: theme.radius.pill,
   }),
   sparkWrap: { opacity: 0.85 },
+  expanded: {
+    borderTop: `1px solid ${theme.colors.border}`,
+    marginTop: 18,
+    paddingTop: 16,
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 1fr',
+    gap: '12px 20px',
+  },
+  detailItem: { display: 'flex', flexDirection: 'column', gap: 2 },
+  detailLabel: {
+    fontSize: 10, fontWeight: 500, color: theme.colors.textFaint,
+    fontFamily: theme.fonts.sans, textTransform: 'uppercase', letterSpacing: '0.08em',
+  },
+  detailValue: {
+    fontSize: 14, fontWeight: 500, color: theme.colors.text,
+    fontFamily: theme.fonts.mono, fontVariantNumeric: 'tabular-nums',
+  },
 }
 
 function Sparkline({ data, positive }) {
@@ -52,19 +72,38 @@ function Sparkline({ data, positive }) {
   )
 }
 
-export default function MetricCard({ label, value, trend, positive = true, period, sparkline }) {
+export default function MetricCard({ label, value, trend, positive = true, period, sparkline, breakdown }) {
   const [hovered, setHovered] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+
   return (
-    <div style={styles.card(hovered)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-      <div>
-        <div style={styles.label}>{label}</div>
-        <div style={styles.value}>{value}</div>
-        {period && <div style={styles.period}>{period}</div>}
+    <div
+      style={styles.card(hovered, expanded)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={() => breakdown && setExpanded(!expanded)}
+    >
+      <div style={styles.top}>
+        <div>
+          <div style={styles.label}>{label}</div>
+          <div style={styles.value}>{value}</div>
+          {period && <div style={styles.period}>{period}</div>}
+        </div>
+        <div style={styles.right}>
+          {trend !== undefined && <div style={styles.trend(positive)}>{positive ? '+' : ''}{trend}%</div>}
+          {sparkline && <div style={styles.sparkWrap}><Sparkline data={sparkline} positive={positive} /></div>}
+        </div>
       </div>
-      <div style={styles.right}>
-        {trend !== undefined && <div style={styles.trend(positive)}>{positive ? '+' : ''}{trend}%</div>}
-        {sparkline && <div style={styles.sparkWrap}><Sparkline data={sparkline} positive={positive} /></div>}
-      </div>
+      {expanded && breakdown && (
+        <div style={styles.expanded}>
+          {breakdown.map((d, i) => (
+            <div key={i} style={styles.detailItem}>
+              <span style={styles.detailLabel}>{d.label}</span>
+              <span style={styles.detailValue}>{d.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
