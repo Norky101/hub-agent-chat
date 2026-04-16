@@ -26,6 +26,7 @@ const STYLES = `
     0%, 100% { transform: scale(1); opacity: 0.6; }
     50% { transform: scale(1.15); opacity: 1; }
   }
+  .chat-scroll { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
   .chat-scroll::-webkit-scrollbar { width: 5px; }
   .chat-scroll::-webkit-scrollbar-track { background: transparent; }
   .chat-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 4px; }
