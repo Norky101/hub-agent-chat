@@ -18,7 +18,7 @@ const styles = {
   },
   agentText: {
     fontSize: '15.5px',
-    lineHeight: 1.7,
+    lineHeight: 1.75,
     fontFamily: theme.fonts.sans,
     fontWeight: 400,
     color: theme.colors.text,
@@ -36,7 +36,6 @@ const styles = {
     maxWidth: '70%',
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
-    textShadow: '0 1px 1px rgba(0,0,0,0.1)',
   },
   timestamp: {
     fontSize: 11,
@@ -60,9 +59,7 @@ export default function MessageBubble({ message, onAction, animate }) {
       <div style={styles.row(true, animate)}>
         <div>
           <div style={styles.userPill}>{message.blocks[0]?.content}</div>
-          {message.showMeta && (
-            <div style={{ ...styles.timestamp, textAlign: 'right' }}>{formatTime(message.timestamp)}</div>
-          )}
+          {message.showMeta && <div style={{ ...styles.timestamp, textAlign: 'right' }}>{formatTime(message.timestamp)}</div>}
         </div>
       </div>
     )
@@ -74,16 +71,11 @@ export default function MessageBubble({ message, onAction, animate }) {
         {message.showMeta && <div style={styles.timestamp}>{formatTime(message.timestamp)}</div>}
         {message.blocks.map((block, i) => {
           switch (block.type) {
-            case 'text':
-              return <div key={i} style={styles.agentText}>{block.content}</div>
-            case 'metric':
-              return <MetricCard key={i} {...block.data} />
-            case 'table':
-              return <DataTable key={i} columns={block.data.columns} rows={block.data.rows} />
-            case 'actions':
-              return <ActionButtons key={i} actions={block.data} onAction={onAction} />
-            default:
-              return null
+            case 'text': return <div key={i} style={styles.agentText}>{block.content}</div>
+            case 'metric': return <MetricCard key={i} {...block.data} />
+            case 'table': return <DataTable key={i} columns={block.data.columns} rows={block.data.rows} details={block.data.details} />
+            case 'actions': return <ActionButtons key={i} actions={block.data} onAction={onAction} />
+            default: return null
           }
         })}
       </div>

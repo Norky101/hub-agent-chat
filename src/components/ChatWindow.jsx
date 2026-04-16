@@ -40,13 +40,13 @@ const styles = {
     width: '100%',
     margin: '0 auto',
     padding: '40px 24px 24px',
-    gap: 32,
+    gap: 28,
   },
   agentId: {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   agentDot: {
     width: 6,
@@ -119,18 +119,12 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
     setShowScroll(el.scrollHeight - el.scrollTop - el.clientHeight > 120)
   }
 
-  // Process messages: compute showMeta and insert gap separators
   const items = []
   messages.forEach((msg, i) => {
     const prev = messages[i - 1]
     const timeDiff = prev ? new Date(msg.timestamp) - new Date(prev.timestamp) : Infinity
     const showMeta = !prev || prev.role !== msg.role || timeDiff > 300000
-
-    // Insert separator for 5+ minute gaps
-    if (prev && timeDiff > 300000) {
-      items.push({ type: 'separator', key: `sep-${i}` })
-    }
-
+    if (prev && timeDiff > 300000) items.push({ type: 'separator', key: `sep-${i}` })
     const shouldAnimate = mountedAt && new Date(msg.timestamp) > new Date(mountedAt)
     items.push({ type: 'message', message: { ...msg, showMeta }, animate: shouldAnimate, key: msg.id })
   })
@@ -138,7 +132,6 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
   return (
     <div style={styles.page}>
       <style>{STYLES}</style>
-
       <div className="chat-scroll" style={styles.content} ref={scrollRef} onScroll={onScrollHandler}>
         {messages.length === 0 ? (
           <WelcomeScreen onSend={onSend} />
@@ -148,16 +141,10 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
               <div style={styles.agentDot} />
               <span style={styles.agentLabel}>Hub Agent</span>
             </div>
-
             {items.map((item) => {
-              if (item.type === 'separator') {
-                return <div key={item.key} style={styles.separator} />
-              }
-              return (
-                <MessageBubble key={item.key} message={item.message} onAction={onAction} animate={item.animate} />
-              )
+              if (item.type === 'separator') return <div key={item.key} style={styles.separator} />
+              return <MessageBubble key={item.key} message={item.message} onAction={onAction} animate={item.animate} />
             })}
-
             {isTyping && (
               <div style={styles.typingRow}>
                 <div style={styles.dot(0)} />
@@ -169,13 +156,11 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
           </div>
         )}
       </div>
-
       <button style={styles.scrollBtn(showScroll)} onClick={() => endRef.current?.scrollIntoView({ behavior: 'smooth' })}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.colors.textMuted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
-
       <InputBar onSend={onSend} speechSupported={speechSupported} isListening={isListening} onToggleMic={onToggleMic} />
     </div>
   )

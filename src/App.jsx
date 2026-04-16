@@ -60,6 +60,38 @@ const initialMessages = [
             { provider: 'Twilio', status: 'Healthy', events: '1,105' },
             { provider: 'SendGrid', status: 'Healthy', events: '307' },
           ],
+          details: {
+            Shopify: [
+              { label: 'Endpoints', value: '3 active' },
+              { label: 'Success Rate', value: '99.8%' },
+              { label: 'Avg Latency', value: '142ms' },
+              { label: 'Last Event', value: '12s ago' },
+            ],
+            Stripe: [
+              { label: 'Endpoints', value: '2 active' },
+              { label: 'Success Rate', value: '99.9%' },
+              { label: 'Avg Latency', value: '89ms' },
+              { label: 'Last Event', value: '34s ago' },
+            ],
+            GitHub: [
+              { label: 'Endpoints', value: '2 active' },
+              { label: 'Success Rate', value: '94.2%', warn: true },
+              { label: 'Failed Events', value: '47 in queue', warn: true },
+              { label: 'Error Type', value: '503 Timeout', warn: true },
+            ],
+            Twilio: [
+              { label: 'Endpoints', value: '1 active' },
+              { label: 'Success Rate', value: '100%' },
+              { label: 'Avg Latency', value: '203ms' },
+              { label: 'Last Event', value: '2m ago' },
+            ],
+            SendGrid: [
+              { label: 'Endpoints', value: '1 active' },
+              { label: 'Success Rate', value: '100%' },
+              { label: 'Avg Latency', value: '167ms' },
+              { label: 'Last Event', value: '8m ago' },
+            ],
+          },
         },
       },
     ],
