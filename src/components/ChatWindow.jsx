@@ -120,13 +120,19 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
   }
 
   const items = []
+  const totalMessages = messages.length
   messages.forEach((msg, i) => {
     const prev = messages[i - 1]
     const timeDiff = prev ? new Date(msg.timestamp) - new Date(prev.timestamp) : Infinity
     const showMeta = !prev || prev.role !== msg.role || timeDiff > 300000
     if (prev && timeDiff > 300000) items.push({ type: 'separator', key: `sep-${i}` })
     const shouldAnimate = mountedAt && new Date(msg.timestamp) > new Date(mountedAt)
-    items.push({ type: 'message', message: { ...msg, showMeta }, animate: shouldAnimate, key: msg.id })
+
+    // Focus fade: last 3 messages full opacity, then gradient down
+    const distFromEnd = totalMessages - 1 - i
+    const focusOpacity = distFromEnd <= 2 ? 1 : Math.max(0.4, 1 - (distFromEnd - 2) * 0.15)
+
+    items.push({ type: 'message', message: { ...msg, showMeta }, animate: shouldAnimate, key: msg.id, focusOpacity })
   })
 
   return (
@@ -143,7 +149,7 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
             </div>
             {items.map((item) => {
               if (item.type === 'separator') return <div key={item.key} style={styles.separator} />
-              return <MessageBubble key={item.key} message={item.message} onAction={onAction} onSend={onSend} animate={item.animate} />
+              return <MessageBubble key={item.key} message={item.message} onAction={onAction} onSend={onSend} animate={item.animate} focusOpacity={item.focusOpacity} />
             })}
             {isTyping && (
               <div style={styles.typingRow}>

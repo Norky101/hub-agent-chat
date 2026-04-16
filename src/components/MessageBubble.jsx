@@ -7,11 +7,12 @@ import FollowUps from './FollowUps.jsx'
 import SourceTag from './SourceTag.jsx'
 
 const styles = {
-  row: (isUser, animate) => ({
+  row: (isUser, animate, focusOpacity) => ({
     display: 'flex',
     justifyContent: isUser ? 'flex-end' : 'flex-start',
-    opacity: animate ? 0 : 1,
+    opacity: animate ? 0 : (focusOpacity ?? 1),
     animation: animate ? 'fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
+    transition: 'opacity 0.6s ease',
   }),
   agentContent: {
     maxWidth: 560,
@@ -64,12 +65,12 @@ function renderText(text) {
   })
 }
 
-export default function MessageBubble({ message, onAction, onSend, animate }) {
+export default function MessageBubble({ message, onAction, onSend, animate, focusOpacity }) {
   const isUser = message.role === 'user'
 
   if (isUser) {
     return (
-      <div style={styles.row(true, animate)}>
+      <div style={styles.row(true, animate, focusOpacity)}>
         <div>
           <div style={styles.userPill}>{message.blocks[0]?.content}</div>
           {message.showMeta && <div style={{ ...styles.timestamp, textAlign: 'right' }}>{formatTime(message.timestamp)}</div>}
@@ -79,7 +80,7 @@ export default function MessageBubble({ message, onAction, onSend, animate }) {
   }
 
   return (
-    <div style={styles.row(false, animate)}>
+    <div style={styles.row(false, animate, focusOpacity)}>
       <div style={styles.agentContent}>
         {message.showMeta && <div style={styles.timestamp}>{formatTime(message.timestamp)}</div>}
         {message.blocks.map((block, i) => {
