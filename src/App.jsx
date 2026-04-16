@@ -14,7 +14,7 @@ const initialMessages = [
     blocks: [
       {
         type: 'text',
-        content: 'Morning. Your pipeline processed 24,847 events overnight. Four providers are clean, but GitHub needs attention.',
+        content: 'Morning. Your pipeline processed **24,847 events** overnight. Four providers are clean, but **GitHub** needs attention.',
         source: 'live',
       },
     ],
@@ -113,12 +113,12 @@ const initialMessages = [
     blocks: [
       {
         type: 'text',
-        content: 'GitHub\u2019s push event endpoint has been returning 503s for about 45 minutes. Response times jumped from 200ms to 12s before timing out. 47 events are sitting in the retry queue and will expire in 6 hours.',
+        content: '**GitHub\u2019s** push event endpoint has been returning **503s** for about **45 minutes**. **Response times** jumped from **200ms to 12s** before timing out. **47 events** are sitting in the **retry queue** and will **expire in 6 hours**.',
         source: 'logs',
       },
       {
         type: 'text',
-        content: 'My recommendation: retry the batch with an extended 30s timeout. Based on the pattern, about 80% should recover once we get past the gateway bottleneck. For the rest, I can hold them and retry again in an hour when GitHub\u2019s load typically drops.',
+        content: 'My recommendation: retry the batch with an extended **30s timeout**. Based on the pattern, about **80% should recover** once we get past the gateway bottleneck. For the rest, I can hold them and retry again in **an hour** when GitHub\u2019s load typically drops.',
       },
       {
         type: 'actions',
@@ -148,35 +148,35 @@ const actionResponses = {
   'retry-now': [
     {
       type: 'text',
-      content: 'Retrying all 47 events with a 30s timeout. I\u2019ll batch them in groups of 10 to avoid hammering the endpoint.',
+      content: 'Retrying all **47 events** with a **30s timeout**. I\u2019ll batch them in groups of **10** to avoid hammering the endpoint.',
     },
     {
       type: 'text',
-      content: 'First batch is through \u2014 8 of 10 delivered successfully. The 2 that failed are both large payload push events (>500KB). I\u2019ll split those into chunked deliveries and retry separately.',
+      content: 'First batch is through \u2014 **8 of 10 delivered** successfully. The 2 that failed are both large payload push events (**>500KB**). I\u2019ll split those into chunked deliveries and retry separately.',
     },
   ],
   'pause-endpoint': [
     {
       type: 'text',
-      content: 'GitHub endpoint paused. All incoming push, PR, and issue events will buffer \u2014 current queue can hold about 72 hours at this volume.',
+      content: '**GitHub endpoint paused.** All incoming push, PR, and issue events will buffer \u2014 current queue can hold about **72 hours** at this volume.',
     },
     {
       type: 'text',
-      content: 'I\u2019m watching GitHub\u2019s status page. Their last incident took ~2 hours to resolve. I\u2019ll auto-resume delivery and drain the buffer once their API returns to <500ms response times. You\u2019ll get a notification either way.',
+      content: 'I\u2019m watching GitHub\u2019s status page. Their last incident took **~2 hours** to resolve. I\u2019ll **auto-resume delivery** and drain the buffer once their API returns to **<500ms** response times. You\u2019ll get a notification either way.',
     },
   ],
   'view-logs': [
     {
       type: 'text',
-      content: 'Here\u2019s the pattern I\u2019m seeing across the 47 failures:',
+      content: 'Here\u2019s the pattern I\u2019m seeing across the **47 failures**:',
     },
     {
       type: 'text',
-      content: '\u2022 43 are 503 gateway timeouts \u2014 all push events, avg payload 128KB, response cut off at 10s\n\u2022 4 returned 200 but with malformed JSON bodies (likely partial responses from the gateway)\n\u2022 All failures started at 2:14 AM, correlating with a spike in GitHub\u2019s own event volume\n\u2022 The endpoint itself is fine \u2014 this is upstream GitHub infrastructure',
+      content: '\u2022 **43** are **503 gateway timeouts** \u2014 all push events, avg payload 128KB, response cut off at 10s\n\u2022 **4** returned 200 but with **malformed JSON** bodies (likely partial responses from the gateway)\n\u2022 All failures started at **2:14 AM**, correlating with a spike in GitHub\u2019s own event volume\n\u2022 The endpoint itself is fine \u2014 this is **upstream GitHub infrastructure**',
     },
     {
       type: 'text',
-      content: 'I\u2019d recommend retrying the 43 timeouts with an extended window. The 4 malformed responses need a full re-delivery since the original payloads were corrupted. Want me to handle both?',
+      content: 'I\u2019d recommend retrying the **43 timeouts** with an extended window. The **4 malformed responses** need a full re-delivery since the original payloads were corrupted. Want me to handle both?',
     },
     {
       type: 'actions',

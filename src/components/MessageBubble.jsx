@@ -54,6 +54,16 @@ function formatTime(ts) {
   return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 }
 
+function renderText(text) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} style={{ fontWeight: 600 }}>{part.slice(2, -2)}</strong>
+    }
+    return part
+  })
+}
+
 export default function MessageBubble({ message, onAction, onSend, animate }) {
   const isUser = message.role === 'user'
 
@@ -77,7 +87,7 @@ export default function MessageBubble({ message, onAction, onSend, animate }) {
             case 'text':
               return (
                 <div key={i} style={styles.agentText}>
-                  {block.content}
+                  {renderText(block.content)}
                   {block.source && <SourceTag source={block.source} />}
                 </div>
               )
