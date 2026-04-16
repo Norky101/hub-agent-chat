@@ -54,8 +54,21 @@
   .one-more li { display: list-item; list-style: none; padding-left: 20px; position: relative; }
   .one-more li::before { content: '•'; position: absolute; left: 0; top: 0; width: auto; height: auto; background: none; color: #4F6EF7; font-size: 20px; margin: 0; border-radius: 0; }
 
+  .chapters { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; padding: 16px 40px; gap: 6px; z-index: 20; background: rgba(248,247,244,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .chapters button { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 400; color: #b5b0ab; background: none; border: none; padding: 6px 14px; border-radius: 9999px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; letter-spacing: 0.01em; }
+  .chapters button:hover { color: #12110f; background: rgba(0,0,0,0.03); }
+  .chapters button.active { color: #4F6EF7; background: rgba(79,110,247,0.06); font-weight: 500; }
+  .chapters .divider { width: 1px; height: 14px; background: rgba(18,17,15,0.08); flex-shrink: 0; }
+  .one-more .chapters { background: rgba(18,17,15,0.85); }
+  .one-more .chapters button { color: rgba(248,247,244,0.35); }
+  .one-more .chapters button:hover { color: #f8f7f4; background: rgba(255,255,255,0.06); }
+  .one-more .chapters button.active { color: #7B8FFF; background: rgba(79,110,247,0.12); }
+  .one-more .chapters .divider { background: rgba(255,255,255,0.08); }
+
   @media (max-width: 768px) {
-    .slide { padding: 32px 24px; }
+    .slide { padding: 32px 24px; padding-top: 60px; }
+    .chapters { padding: 10px 16px; gap: 2px; }
+    .chapters button { font-size: 11px; padding: 5px 10px; }
     h1 { font-size: 32px; }
     h2 { font-size: 24px; }
     .cols-2, .cols-3 { grid-template-columns: 1fr; gap: 32px; }
@@ -65,6 +78,18 @@
 </style>
 </head>
 <body>
+
+<div class="chapters" id="chapters">
+  <button class="active" data-go="0">Hub Agent</button>
+  <span class="divider"></span>
+  <button data-go="1">What I Built</button>
+  <span class="divider"></span>
+  <button data-go="2">Sharp Colleague</button>
+  <span class="divider"></span>
+  <button data-go="3">Industry Gaps</button>
+  <span class="divider"></span>
+  <button data-go="4">One More Thing</button>
+</div>
 
 <div class="deck" id="deck">
 
@@ -214,15 +239,23 @@
   let current = 0;
   const slides = document.querySelectorAll('.slide');
   const counter = document.getElementById('current');
+  const chapterBtns = document.querySelectorAll('.chapters button');
 
-  function navigate(dir) {
-    const next = current + dir;
-    if (next < 0 || next >= slides.length) return;
+  function goTo(index) {
+    if (index < 0 || index >= slides.length) return;
     slides[current].classList.remove('active');
-    current = next;
+    current = index;
     slides[current].classList.add('active');
     counter.textContent = current + 1;
+    chapterBtns.forEach((b, i) => b.classList.toggle('active', i === current));
   }
+
+  function navigate(dir) { goTo(current + dir); }
+
+  // Chapter nav clicks
+  chapterBtns.forEach(btn => {
+    btn.addEventListener('click', () => goTo(parseInt(btn.dataset.go)));
+  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigate(1); }
