@@ -3,24 +3,18 @@ import theme from '../theme.js'
 
 const styles = {
   card: (hovered) => ({
-    ...theme.glass,
+    background: theme.colors.surface,
+    border: `1px solid ${hovered ? theme.colors.borderStrong : theme.colors.border}`,
     borderRadius: theme.radius.lg,
-    padding: '24px 28px',
+    borderBottom: `2px solid ${theme.colors.accent}`,
+    padding: '22px 24px',
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 20,
     maxWidth: 380,
-    transition: `all ${theme.transition.base}`,
-    boxShadow: hovered
-      ? '0 8px 32px rgba(79, 110, 247, 0.08), 0 2px 8px rgba(0,0,0,0.03)'
-      : theme.glass.boxShadow,
-    transform: hovered ? 'translateY(-1px)' : 'none',
+    transition: `border-color ${theme.transition.base}`,
   }),
-  left: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
   label: {
     fontSize: 11,
     fontWeight: 500,
@@ -30,7 +24,7 @@ const styles = {
     textTransform: 'uppercase',
   },
   value: {
-    fontSize: 42,
+    fontSize: 38,
     fontWeight: 500,
     color: theme.colors.text,
     fontFamily: theme.fonts.sans,
@@ -60,10 +54,12 @@ const styles = {
     fontFamily: theme.fonts.mono,
     color: positive ? theme.colors.green : theme.colors.red,
     background: positive ? theme.colors.greenSoft : theme.colors.redSoft,
-    padding: '4px 12px',
+    padding: '3px 10px',
     borderRadius: theme.radius.pill,
-    letterSpacing: '0.02em',
   }),
+  sparkWrap: {
+    opacity: 0.85,
+  },
 }
 
 function Sparkline({ data, positive }) {
@@ -98,23 +94,17 @@ export default function MetricCard({ label, value, trend, positive = true, perio
   const [hovered, setHovered] = useState(false)
 
   return (
-    <div
-      style={styles.card(hovered)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div style={styles.left}>
+    <div style={styles.card(hovered)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+      <div>
         <div style={styles.label}>{label}</div>
         <div style={styles.value}>{value}</div>
         {period && <div style={styles.period}>{period}</div>}
       </div>
       <div style={styles.right}>
         {trend !== undefined && (
-          <div style={styles.trend(positive)}>
-            {positive ? '+' : ''}{trend}%
-          </div>
+          <div style={styles.trend(positive)}>{positive ? '+' : ''}{trend}%</div>
         )}
-        {sparkline && <Sparkline data={sparkline} positive={positive} />}
+        {sparkline && <div style={styles.sparkWrap}><Sparkline data={sparkline} positive={positive} /></div>}
       </div>
     </div>
   )

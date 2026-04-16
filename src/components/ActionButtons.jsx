@@ -11,28 +11,16 @@ const styles = {
     fontFamily: theme.fonts.sans,
     fontSize: 14,
     fontWeight: 400,
-    padding: '10px 22px',
+    padding: '9px 18px',
     borderRadius: theme.radius.pill,
-    border: clicked
-      ? '1px solid transparent'
-      : `1px solid ${hovered ? 'rgba(79, 110, 247, 0.3)' : theme.colors.border}`,
-    background: clicked
-      ? 'linear-gradient(135deg, rgba(79, 110, 247, 0.1), rgba(120, 90, 220, 0.06))'
-      : hovered
-        ? 'rgba(79, 110, 247, 0.04)'
-        : theme.glass.background,
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
+    border: `1px solid ${clicked ? theme.colors.accent : hovered ? 'rgba(79, 110, 247, 0.3)' : theme.colors.border}`,
+    background: clicked ? theme.colors.accentSoft : hovered ? 'rgba(0, 0, 0, 0.015)' : 'transparent',
     color: clicked ? theme.colors.accent : hovered ? theme.colors.text : theme.colors.textSecondary,
     cursor: clicked ? 'default' : 'pointer',
     transition: `all ${theme.transition.base}`,
     display: 'inline-flex',
     alignItems: 'center',
     gap: 6,
-    boxShadow: hovered && !clicked
-      ? '0 2px 12px rgba(79, 110, 247, 0.08)'
-      : '0 1px 3px rgba(0,0,0,0.02)',
-    transform: hovered && !clicked ? 'translateY(-1px)' : 'none',
     letterSpacing: '0.01em',
   }),
 }

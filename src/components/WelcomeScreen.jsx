@@ -16,44 +16,17 @@ const styles = {
     justifyContent: 'center',
     padding: '0 24px 80px',
   },
-  orbContainer: {
-    position: 'relative',
-    width: 140,
-    height: 140,
-    marginBottom: 40,
-  },
-  orbOuter: {
-    position: 'absolute',
-    inset: 0,
+  mark: {
+    width: 48,
+    height: 48,
     borderRadius: '50%',
-    background: 'radial-gradient(circle at 30% 35%, rgba(79, 110, 247, 0.18) 0%, rgba(120, 90, 220, 0.08) 40%, transparent 70%)',
-    animation: 'orbFloat 8s ease-in-out infinite',
-  },
-  orbMid: {
-    position: 'absolute',
-    top: '18%',
-    left: '18%',
-    width: '64%',
-    height: '64%',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle at 45% 40%, rgba(79, 110, 247, 0.22) 0%, rgba(160, 140, 240, 0.08) 50%, transparent 75%)',
-    filter: 'blur(2px)',
-    animation: 'orbFloat 6s ease-in-out 0.5s infinite',
-  },
-  orbCore: {
-    position: 'absolute',
-    top: '32%',
-    left: '32%',
-    width: '36%',
-    height: '36%',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(79, 110, 247, 0.3) 0%, rgba(100, 130, 255, 0.1) 60%, transparent 80%)',
-    filter: 'blur(4px)',
-    animation: 'orbFloat 5s ease-in-out 1s infinite',
+    background: `linear-gradient(135deg, ${theme.colors.accent}, #7B5CF7)`,
+    opacity: 0.9,
+    marginBottom: 28,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 400,
+    fontSize: 24,
+    fontWeight: 500,
     color: theme.colors.text,
     fontFamily: theme.fonts.sans,
     letterSpacing: '-0.03em',
@@ -90,11 +63,7 @@ export default function WelcomeScreen({ onSend }) {
   const [hovered, setHovered] = useState(null)
   return (
     <div style={styles.wrapper}>
-      <div style={styles.orbContainer}>
-        <div style={styles.orbOuter} />
-        <div style={styles.orbMid} />
-        <div style={styles.orbCore} />
-      </div>
+      <div style={styles.mark} />
       <div style={styles.title}>Hub Agent</div>
       <div style={styles.subtitle}>Your webhook pipeline, managed</div>
       <div style={styles.pills}>

@@ -6,36 +6,12 @@ import InputBar from './InputBar.jsx'
 
 const STYLES = `
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes orbFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
   }
   @keyframes typing {
     0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
     30% { opacity: 0.7; transform: translateY(-3px); }
-  }
-  @keyframes drift1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    25% { transform: translate(40px, -30px) scale(1.05); }
-    50% { transform: translate(-15px, -50px) scale(0.95); }
-    75% { transform: translate(-35px, -15px) scale(1.02); }
-  }
-  @keyframes drift2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-50px, 25px) scale(1.08); }
-    66% { transform: translate(30px, -35px) scale(0.96); }
-  }
-  @keyframes drift3 {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(30px, 30px); }
-  }
-  @keyframes drift4 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    40% { transform: translate(-25px, -40px) scale(1.1); }
-    80% { transform: translate(15px, 20px) scale(0.97); }
   }
   .chat-scroll::-webkit-scrollbar { width: 5px; }
   .chat-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -49,34 +25,12 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     background: theme.colors.bg,
-    position: 'relative',
-    overflow: 'hidden',
   },
-  floatingBg: {
-    position: 'absolute',
-    inset: 0,
-    pointerEvents: 'none',
-    zIndex: 0,
-  },
-  shape: (top, left, size, color, opacity, anim, dur) => ({
-    position: 'absolute',
-    top, left,
-    width: size,
-    height: size,
-    borderRadius: '50%',
-    background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
-    opacity,
-    filter: 'blur(80px)',
-    animation: `${anim} ${dur}s ease-in-out infinite`,
-    willChange: 'transform',
-  }),
   content: {
     flex: 1,
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    position: 'relative',
-    zIndex: 1,
   },
   messages: {
     flex: 1,
@@ -85,8 +39,33 @@ const styles = {
     maxWidth: 680,
     width: '100%',
     margin: '0 auto',
-    padding: '48px 24px 24px',
-    gap: 28,
+    padding: '40px 24px 24px',
+    gap: 32,
+  },
+  agentId: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  agentDot: {
+    width: 6,
+    height: 6,
+    borderRadius: '50%',
+    background: theme.colors.accent,
+  },
+  agentLabel: {
+    fontSize: 12,
+    fontWeight: 500,
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.sans,
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+  },
+  separator: {
+    width: '100%',
+    height: 1,
+    background: theme.colors.border,
   },
   typingRow: {
     display: 'flex',
@@ -105,13 +84,15 @@ const styles = {
   }),
   scrollBtn: (vis) => ({
     position: 'fixed',
-    bottom: 110,
+    bottom: 100,
     left: '50%',
     transform: 'translateX(-50%)',
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     borderRadius: '50%',
-    ...theme.glass,
+    background: theme.colors.surface,
+    border: `1px solid ${theme.colors.border}`,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
@@ -121,18 +102,6 @@ const styles = {
     transition: `opacity ${theme.transition.base}`,
     zIndex: 10,
   }),
-  inputWrap: { position: 'relative', zIndex: 1 },
-}
-
-function Bg() {
-  return (
-    <div style={styles.floatingBg}>
-      <div style={styles.shape('5%', '70%', 320, 'rgba(79, 110, 247, 0.12)', 0.7, 'drift1', 30)} />
-      <div style={styles.shape('55%', '2%', 280, 'rgba(140, 100, 240, 0.08)', 0.6, 'drift2', 38)} />
-      <div style={styles.shape('25%', '80%', 200, 'rgba(80, 170, 255, 0.06)', 0.5, 'drift3', 24)} />
-      <div style={styles.shape('70%', '55%', 260, 'rgba(79, 110, 247, 0.05)', 0.5, 'drift4', 44)} />
-    </div>
-  )
 }
 
 export default function ChatWindow({ messages, isTyping, onSend, onAction, mountedAt, speechSupported, isListening, onToggleMic }) {
@@ -150,26 +119,45 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
     setShowScroll(el.scrollHeight - el.scrollTop - el.clientHeight > 120)
   }
 
-  const processed = messages.map((msg, i) => {
+  // Process messages: compute showMeta and insert gap separators
+  const items = []
+  messages.forEach((msg, i) => {
     const prev = messages[i - 1]
-    const showMeta = !prev || prev.role !== msg.role || (new Date(msg.timestamp) - new Date(prev.timestamp)) > 120000
+    const timeDiff = prev ? new Date(msg.timestamp) - new Date(prev.timestamp) : Infinity
+    const showMeta = !prev || prev.role !== msg.role || timeDiff > 300000
+
+    // Insert separator for 5+ minute gaps
+    if (prev && timeDiff > 300000) {
+      items.push({ type: 'separator', key: `sep-${i}` })
+    }
+
     const shouldAnimate = mountedAt && new Date(msg.timestamp) > new Date(mountedAt)
-    return { ...msg, showMeta, _animate: shouldAnimate }
+    items.push({ type: 'message', message: { ...msg, showMeta }, animate: shouldAnimate, key: msg.id })
   })
 
   return (
     <div style={styles.page}>
       <style>{STYLES}</style>
-      <Bg />
 
       <div className="chat-scroll" style={styles.content} ref={scrollRef} onScroll={onScrollHandler}>
         {messages.length === 0 ? (
           <WelcomeScreen onSend={onSend} />
         ) : (
           <div style={styles.messages}>
-            {processed.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} onAction={onAction} animate={msg._animate} />
-            ))}
+            <div style={styles.agentId}>
+              <div style={styles.agentDot} />
+              <span style={styles.agentLabel}>Hub Agent</span>
+            </div>
+
+            {items.map((item) => {
+              if (item.type === 'separator') {
+                return <div key={item.key} style={styles.separator} />
+              }
+              return (
+                <MessageBubble key={item.key} message={item.message} onAction={onAction} animate={item.animate} />
+              )
+            })}
+
             {isTyping && (
               <div style={styles.typingRow}>
                 <div style={styles.dot(0)} />
@@ -188,9 +176,7 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
         </svg>
       </button>
 
-      <div style={styles.inputWrap}>
-        <InputBar onSend={onSend} speechSupported={speechSupported} isListening={isListening} onToggleMic={onToggleMic} />
-      </div>
+      <InputBar onSend={onSend} speechSupported={speechSupported} isListening={isListening} onToggleMic={onToggleMic} />
     </div>
   )
 }

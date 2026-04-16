@@ -7,24 +7,22 @@ const styles = {
   row: (isUser, animate) => ({
     display: 'flex',
     justifyContent: isUser ? 'flex-end' : 'flex-start',
-    padding: '2px 0',
     opacity: animate ? 0 : 1,
-    animation: animate ? `fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards` : 'none',
+    animation: animate ? 'fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
   }),
   agentContent: {
-    maxWidth: '100%',
+    maxWidth: 560,
     display: 'flex',
     flexDirection: 'column',
     gap: 16,
   },
   agentText: {
-    fontSize: 16,
-    lineHeight: 1.75,
+    fontSize: '15.5px',
+    lineHeight: 1.7,
     fontFamily: theme.fonts.sans,
     fontWeight: 400,
     color: theme.colors.text,
-    letterSpacing: '0.005em',
-    maxWidth: 600,
+    letterSpacing: '0.01em',
   },
   userPill: {
     fontSize: 15,
@@ -33,12 +31,12 @@ const styles = {
     fontWeight: 400,
     color: theme.colors.userText,
     background: theme.colors.userBubble,
-    padding: '12px 20px',
-    borderRadius: '22px 22px 6px 22px',
+    padding: '11px 18px',
+    borderRadius: '20px 20px 4px 20px',
     maxWidth: '70%',
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+    textShadow: '0 1px 1px rgba(0,0,0,0.1)',
   },
   timestamp: {
     fontSize: 11,
@@ -63,9 +61,7 @@ export default function MessageBubble({ message, onAction, animate }) {
         <div>
           <div style={styles.userPill}>{message.blocks[0]?.content}</div>
           {message.showMeta && (
-            <div style={{ ...styles.timestamp, textAlign: 'right' }}>
-              {formatTime(message.timestamp)}
-            </div>
+            <div style={{ ...styles.timestamp, textAlign: 'right' }}>{formatTime(message.timestamp)}</div>
           )}
         </div>
       </div>
@@ -75,9 +71,7 @@ export default function MessageBubble({ message, onAction, animate }) {
   return (
     <div style={styles.row(false, animate)}>
       <div style={styles.agentContent}>
-        {message.showMeta && (
-          <div style={styles.timestamp}>{formatTime(message.timestamp)}</div>
-        )}
+        {message.showMeta && <div style={styles.timestamp}>{formatTime(message.timestamp)}</div>}
         {message.blocks.map((block, i) => {
           switch (block.type) {
             case 'text':
