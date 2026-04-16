@@ -194,7 +194,127 @@ const secondaryActions = {
   'retry-timeouts': 'Retrying the 43 timeout events now. I\u2019ll hold the 4 malformed ones for your review \u2014 they may need manual payload inspection before re-delivery.',
 }
 
-const keywords = /\b(shopify|stripe|github|twilio|sendgrid|webhook|event|endpoint|retry|fail|error|503|log|provider|latency|queue|alert|pause|status|deliver|pipeline)\b/i
+const keywords = /\b(shopify|stripe|github|twilio|sendgrid|webhook|event|endpoint|retry|fail|error|503|log|provider|latency|queue|alert|pause|status|deliver|pipeline|trend|week|day|overview|health)\b/i
+
+// Specific responses for follow-up suggestions and common queries
+const queryResponses = {
+  'what about the other providers?': {
+    blocks: [
+      { type: 'text', content: 'The other four are running clean. **Shopify** is your highest volume at **12,340 events** with a **99.8%** delivery rate. **Stripe** is close behind at **8,204** and **99.9%** \u2014 essentially flawless. **Twilio** and **SendGrid** are low volume but both at **100%** delivery.', source: 'live' },
+      { type: 'text', content: 'No action needed on any of them. The only thing I\u2019d flag is Twilio\u2019s latency at **203ms** \u2014 it\u2019s within normal range but higher than usual. Could be their US-East region. I\u2019ll keep an eye on it.' },
+    ],
+    followUps: ['Dig into Twilio latency', 'Compare this week to last', 'Set up latency alerts'],
+  },
+  'show me the last 7 days trend': {
+    blocks: [
+      { type: 'text', content: 'Here\u2019s your 7-day pipeline trend:', source: 'live' },
+      {
+        type: 'metric',
+        data: {
+          label: '7-Day Volume',
+          value: '168K',
+          trend: 12,
+          positive: true,
+          period: 'Apr 9 \u2013 Apr 15',
+          sparkline: [21200, 22800, 24100, 23400, 25600, 24200, 24847],
+          breakdown: [
+            { label: 'Mon', value: '21,200' },
+            { label: 'Tue', value: '22,800' },
+            { label: 'Wed', value: '24,100' },
+            { label: 'Thu', value: '23,400' },
+            { label: 'Fri', value: '25,600' },
+            { label: 'Sat', value: '24,200' },
+            { label: 'Sun', value: '24,847' },
+          ],
+        },
+      },
+      { type: 'text', content: 'Volume is up **12%** week over week. The Friday spike correlates with Shopify\u2019s end-of-week order processing \u2014 that\u2019s consistent with the last 3 weeks. Overall delivery rate held steady at **99.4%** across the period. The only dip was today\u2019s GitHub issue.' },
+    ],
+    followUps: ['Break down by provider', 'Show failure rate trend', 'Export this data'],
+  },
+  'set up an alert for github': {
+    blocks: [
+      { type: 'text', content: 'I\u2019ll configure a GitHub-specific alert. Here\u2019s what I\u2019d recommend based on today\u2019s incident:' },
+      { type: 'text', content: '\u2022 **Error rate threshold:** Alert when delivery failures exceed **5%** over a 15-minute window\n\u2022 **Latency threshold:** Alert when avg response time exceeds **5s** (today it hit 12s before we caught it)\n\u2022 **Queue depth:** Alert when retry queue exceeds **20 events**\n\u2022 **Notification:** Slack #ops-alerts + email' },
+      {
+        type: 'actions',
+        data: [
+          { id: 'confirm-alert', label: 'Set up these alerts' },
+          { id: 'customize-alert', label: 'Customize thresholds' },
+        ],
+      },
+    ],
+  },
+  'show provider health': {
+    blocks: [
+      { type: 'text', content: 'Current provider health across your pipeline:', source: 'live' },
+      {
+        type: 'table',
+        data: {
+          columns: [
+            { key: 'provider', label: 'Provider', type: 'name' },
+            { key: 'status', label: 'Health', type: 'status' },
+            { key: 'rate', label: 'Success', align: 'right' },
+          ],
+          rows: [
+            { provider: 'Shopify', status: 'Healthy', rate: '99.8%' },
+            { provider: 'Stripe', status: 'Healthy', rate: '99.9%' },
+            { provider: 'GitHub', status: 'Degraded', rate: '94.2%' },
+            { provider: 'Twilio', status: 'Healthy', rate: '100%' },
+            { provider: 'SendGrid', status: 'Healthy', rate: '100%' },
+          ],
+        },
+      },
+    ],
+    followUps: ['What\u2019s wrong with GitHub?', 'Show event volume', 'Set up health alerts'],
+  },
+  'any failed events?': {
+    blocks: [
+      { type: 'text', content: 'Yes \u2014 **488 total failures** in the last 24 hours. The vast majority are from GitHub:', source: 'logs' },
+      { type: 'text', content: '\u2022 **GitHub:** 47 active failures (503 timeouts), 394 recovered via auto-retry\n\u2022 **Shopify:** 43 transient failures, all recovered within 2 retries\n\u2022 **Stripe:** 4 failures, all malformed webhook signatures (likely clock skew)\n\u2022 **Twilio/SendGrid:** 0 failures' },
+      { type: 'text', content: 'The 47 GitHub events in the retry queue are the ones that need attention. Everything else self-healed.' },
+    ],
+    reasoning: [
+      'Queried failure logs for the last 24 hours across all providers',
+      'Grouped by provider and failure type',
+      'Cross-referenced with retry outcomes to separate recovered vs active',
+      'Identified the 47 GitHub events as the only unresolved batch',
+    ],
+    followUps: ['Handle the GitHub failures', 'Show me the Stripe signature errors', 'Failure trend this week'],
+  },
+  'pipeline overview': {
+    blocks: [
+      { type: 'text', content: 'Here\u2019s your pipeline at a glance:', source: 'live' },
+      {
+        type: 'metric',
+        data: {
+          label: 'Events Today',
+          value: '24.8K',
+          trend: 18,
+          positive: true,
+          period: 'since midnight',
+          sparkline: [180, 210, 195, 240, 220, 260, 310, 290, 340, 248],
+          breakdown: [
+            { label: 'Delivered', value: '24,312' },
+            { label: 'Failed', value: '488' },
+            { label: 'Retrying', value: '47' },
+            { label: 'Providers', value: '5 active' },
+            { label: 'Endpoints', value: '9 total' },
+            { label: 'Uptime', value: '99.4%' },
+          ],
+        },
+      },
+      { type: 'text', content: 'One issue to flag: **GitHub** is degraded with **47 events** stuck in the retry queue. All other providers are healthy. Want me to walk through the GitHub situation?' },
+    ],
+    followUps: ['Yes, show me GitHub', 'Provider breakdown', 'Compare to yesterday'],
+  },
+}
+
+// Secondary action responses for alert setup
+const alertActions = {
+  'confirm-alert': 'Done. Three alerts configured for GitHub: **error rate >5%**, **latency >5s**, and **queue depth >20**. Notifications will go to Slack #ops-alerts and your email. I\u2019ll also add a 1-minute cooldown so you don\u2019t get spammed during an incident.',
+  'customize-alert': 'Sure. What would you like to adjust? You can change the thresholds, the notification channels, or add provider-specific rules. For example, you might want tighter thresholds for Stripe since payment webhooks are critical.',
+}
 
 const relevantReplies = [
   'Checking on that now. Give me a moment to pull the latest data.',
@@ -235,6 +355,24 @@ function App() {
       blocks: [{ type: 'text', content: text }],
     })
 
+    // Check for a specific query response first
+    const queryKey = text.toLowerCase().replace(/[?!.,]/g, '').trim()
+    const specific = queryResponses[queryKey]
+
+    if (specific) {
+      setIsTyping(true)
+      setTimeout(() => {
+        setIsTyping(false)
+        addMessage({
+          id: (Date.now() + 1).toString(),
+          role: 'agent',
+          timestamp: new Date().toISOString(),
+          ...specific,
+        })
+      }, 1200 + Math.random() * 800)
+      return
+    }
+
     const isRelevant = keywords.test(text)
     const reply = isRelevant
       ? relevantReplies[Math.floor(Math.random() * relevantReplies.length)]
@@ -273,8 +411,8 @@ function App() {
       return
     }
 
-    // Check secondary (single text)
-    const text = secondaryActions[action.id]
+    // Check secondary (single text) — includes alert actions
+    const text = secondaryActions[action.id] || alertActions[action.id]
     if (text) {
       setIsTyping(true)
       setTimeout(() => {

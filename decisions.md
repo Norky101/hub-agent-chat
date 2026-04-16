@@ -360,3 +360,25 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 **Behavior:** Clears all messages, resets typing state, resets the mountedAt timestamp so new messages in the next conversation animate fresh. Transitions smoothly back to the welcome screen with the logo and prompt pills.
 
 **Alternatives considered:** Sidebar with chat history (too much scope for a conversation component). Keyboard shortcut only (invisible to most users). Icon-only button (not discoverable enough — "New chat" label removes ambiguity).
+
+---
+
+## 36. Specific Query Responses — Follow-Ups That Actually Work
+
+**Decision:** Every follow-up suggestion pill and common query maps to a specific, contextual multi-block response. "What about the other providers?" returns a detailed breakdown with source tags. "Show me the last 7 days trend" returns a 7-day metric card with daily breakdown. "Set up an alert for GitHub" returns recommended thresholds with action buttons to confirm or customize.
+
+**Why:** Follow-up pills that produce generic "checking on that" responses break trust immediately. The user clicks a specific question and expects a specific answer. If the second interaction falls flat, the entire product feels fake. Each response includes the same level of detail as the initial conversation — trust signals, bold keywords, follow-ups for the next logical question, reasoning trails where appropriate.
+
+**Scope:** 6 specific query responses (other providers, 7-day trend, GitHub alert, provider health, failed events, pipeline overview) + 2 alert action responses (confirm/customize). Each returns rich content (tables, metrics, text with source tags) not just prose.
+
+**Alternatives considered:** AI-powered responses via API (not in scope — this is a frontend component demo). More generic responses with keyword matching (defeats the purpose of contextual follow-ups).
+
+---
+
+## 37. Safari Speech Recognition Fix
+
+**Decision:** Create a fresh SpeechRecognition instance on every mic toggle instead of reusing one created on mount.
+
+**Why:** Safari/iOS silently fails when you call `start()` on a SpeechRecognition object that has already fired `onend`. Chrome allows reuse, Safari doesn't. This manifested as "mic works once then stops." The fix creates a new instance each time, wrapped in try/catch for edge cases where the previous instance hasn't fully cleaned up.
+
+**Alternatives considered:** Detecting Safari and applying a workaround (fragile, user-agent sniffing is unreliable). Creating new instances on every toggle works universally across all browsers.
