@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import ChatWindow from './components/ChatWindow.jsx'
 import InputBar from './components/InputBar.jsx'
 import useSpeechRecognition from './hooks/useSpeechRecognition.js'
@@ -316,6 +316,45 @@ const alertActions = {
   'customize-alert': 'Sure. What would you like to adjust? You can change the thresholds, the notification channels, or add provider-specific rules. For example, you might want tighter thresholds for Stripe since payment webhooks are critical.',
 }
 
+// Proactive incident alert — fires after 45 seconds
+const proactiveAlert = {
+  id: 'proactive-1',
+  role: 'agent',
+  blocks: [
+    {
+      type: 'alert',
+      content: '**Stripe** webhook endpoint is returning **429 rate limit** errors. **23 events** queued in the last 90 seconds. This looks like a sudden traffic spike from a bulk order import.',
+      time: 'just now',
+    },
+    {
+      type: 'text',
+      content: 'The rate limit will reset in ~60 seconds, but events will keep failing until then. I can throttle outgoing deliveries to stay under the limit, or pause and batch them.',
+    },
+    {
+      type: 'actions',
+      data: [
+        { id: 'throttle-stripe', label: 'Throttle deliveries' },
+        { id: 'pause-stripe', label: 'Pause and batch' },
+        { id: 'assign-agent', label: 'Assign to AI Agent' },
+      ],
+    },
+  ],
+}
+
+const incidentResponses = {
+  'throttle-stripe': [
+    { type: 'text', content: 'Throttling Stripe deliveries to **10 per second** (under their rate limit). Events will queue locally and drain over the next **~2 minutes**. I\u2019ll bump back to full speed once the 429s stop.' },
+  ],
+  'pause-stripe': [
+    { type: 'text', content: '**Stripe endpoint paused.** I\u2019m batching incoming events \u2014 once the rate limit window resets (~60s), I\u2019ll send them in a single optimized batch. Expected delivery: **all 23 events within 30 seconds** of resume.' },
+  ],
+  'assign-agent': [
+    { type: 'text', content: 'Taking this over. Here\u2019s my plan:' },
+    { type: 'text', content: '\u2022 **Immediately:** Throttle to 8/sec to stay under the limit\n\u2022 **Next 60s:** Monitor the 429 response rate, adjust throttle dynamically\n\u2022 **On clear:** Drain the queue at full speed, verify all 23 events delivered\n\u2022 **After:** Run a delivery audit and send you a summary' },
+    { type: 'text', content: 'I\u2019ll handle this end to end. You\u2019ll get a notification when it\u2019s resolved \u2014 no action needed from you unless I hit something unexpected.' },
+  ],
+}
+
 const relevantReplies = [
   'Checking on that now. Give me a moment to pull the latest data.',
   'Got it. I\u2019ll look into that and report back with what I find.',
@@ -336,6 +375,18 @@ function App() {
   }, [])
 
   const { isListening, toggle: toggleMic, supported: speechSupported } = useSpeechRecognition(handleTranscript)
+  const alertFired = useRef(false)
+
+  // Proactive alert — fires once after 45 seconds
+  useEffect(() => {
+    if (alertFired.current) return
+    const timer = setTimeout(() => {
+      if (alertFired.current) return
+      alertFired.current = true
+      setMessages((prev) => [...prev, { ...proactiveAlert, timestamp: new Date().toISOString() }])
+    }, 45000)
+    return () => clearTimeout(timer)
+  }, [])
 
   const addMessage = useCallback((msg) => {
     setMessages((prev) => [...prev, msg])
@@ -395,6 +446,22 @@ function App() {
   }, [addMessage])
 
   const handleAction = useCallback((action) => {
+    // Check incident responses (multi-block)
+    const incident = incidentResponses[action.id]
+    if (incident) {
+      setIsTyping(true)
+      setTimeout(() => {
+        setIsTyping(false)
+        addMessage({
+          id: (Date.now() + 1).toString(),
+          role: 'agent',
+          timestamp: new Date().toISOString(),
+          blocks: incident,
+        })
+      }, 800 + Math.random() * 600)
+      return
+    }
+
     // Check primary action responses (multi-block)
     const blocks = actionResponses[action.id]
     if (blocks) {

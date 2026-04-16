@@ -7,6 +7,7 @@ import ActionButtons from './ActionButtons.jsx'
 import ReasoningTrail from './ReasoningTrail.jsx'
 import FollowUps from './FollowUps.jsx'
 import SourceTag from './SourceTag.jsx'
+import AlertBanner from './AlertBanner.jsx'
 
 const styles = {
   row: (isUser) => ({
@@ -42,6 +43,7 @@ const styles = {
     padding: '11px 18px',
     borderRadius: '20px 20px 4px 20px',
     maxWidth: '70%',
+    minWidth: 48,
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
   },
@@ -170,6 +172,7 @@ export default function MessageBubble({ message, onAction, onSend, animate, scro
               case 'metric': return <MetricCard key={i} {...block.data} />
               case 'table': return <DataTable key={i} columns={block.data.columns} rows={block.data.rows} details={block.data.details} />
               case 'actions': return <ActionButtons key={i} actions={block.data} onAction={onAction} />
+              case 'alert': return <AlertBanner key={i} content={block.content} time={block.time} />
               default: return null
             }
           })}

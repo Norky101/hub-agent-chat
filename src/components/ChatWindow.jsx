@@ -159,7 +159,8 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, onNew
   messages.forEach((msg, i) => {
     const prev = messages[i - 1]
     const timeDiff = prev ? new Date(msg.timestamp) - new Date(prev.timestamp) : Infinity
-    const showMeta = !prev || prev.role !== msg.role || timeDiff > 300000
+    // Show timestamp on first message, role changes with >10s gap, or >5min gaps
+    const showMeta = !prev || (prev.role !== msg.role && timeDiff > 10000) || timeDiff > 300000
     if (prev && timeDiff > 300000) items.push({ type: 'separator', key: `sep-${i}` })
     const shouldAnimate = mountedAt && new Date(msg.timestamp) > new Date(mountedAt)
 
