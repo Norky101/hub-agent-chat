@@ -2,6 +2,9 @@ import theme from '../theme.js'
 import MetricCard from './MetricCard.jsx'
 import DataTable from './DataTable.jsx'
 import ActionButtons from './ActionButtons.jsx'
+import ReasoningTrail from './ReasoningTrail.jsx'
+import FollowUps from './FollowUps.jsx'
+import SourceTag from './SourceTag.jsx'
 
 const styles = {
   row: (isUser, animate) => ({
@@ -51,7 +54,7 @@ function formatTime(ts) {
   return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 }
 
-export default function MessageBubble({ message, onAction, animate }) {
+export default function MessageBubble({ message, onAction, onSend, animate }) {
   const isUser = message.role === 'user'
 
   if (isUser) {
@@ -71,13 +74,25 @@ export default function MessageBubble({ message, onAction, animate }) {
         {message.showMeta && <div style={styles.timestamp}>{formatTime(message.timestamp)}</div>}
         {message.blocks.map((block, i) => {
           switch (block.type) {
-            case 'text': return <div key={i} style={styles.agentText}>{block.content}</div>
-            case 'metric': return <MetricCard key={i} {...block.data} />
-            case 'table': return <DataTable key={i} columns={block.data.columns} rows={block.data.rows} details={block.data.details} />
-            case 'actions': return <ActionButtons key={i} actions={block.data} onAction={onAction} />
-            default: return null
+            case 'text':
+              return (
+                <div key={i} style={styles.agentText}>
+                  {block.content}
+                  {block.source && <SourceTag source={block.source} />}
+                </div>
+              )
+            case 'metric':
+              return <MetricCard key={i} {...block.data} />
+            case 'table':
+              return <DataTable key={i} columns={block.data.columns} rows={block.data.rows} details={block.data.details} />
+            case 'actions':
+              return <ActionButtons key={i} actions={block.data} onAction={onAction} />
+            default:
+              return null
           }
         })}
+        {message.reasoning && <ReasoningTrail steps={message.reasoning} />}
+        {message.followUps && onSend && <FollowUps suggestions={message.followUps} onSend={onSend} />}
       </div>
     </div>
   )

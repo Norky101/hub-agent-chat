@@ -15,6 +15,7 @@ const initialMessages = [
       {
         type: 'text',
         content: 'Morning. Your pipeline processed 24,847 events overnight. Four providers are clean, but GitHub needs attention.',
+        source: 'live',
       },
     ],
   },
@@ -52,6 +53,7 @@ const initialMessages = [
       {
         type: 'text',
         content: 'Provider breakdown \u2014 click any row for details:',
+        source: 'live',
       },
       {
         type: 'table',
@@ -111,7 +113,8 @@ const initialMessages = [
     blocks: [
       {
         type: 'text',
-        content: 'GitHub\u2019s push event endpoint has been returning 503s for about 45 minutes. Looks like their API gateway is throttling under load \u2014 response times jumped from 200ms to 12s before timing out. 47 events are sitting in the retry queue and will expire in 6 hours.',
+        content: 'GitHub\u2019s push event endpoint has been returning 503s for about 45 minutes. Response times jumped from 200ms to 12s before timing out. 47 events are sitting in the retry queue and will expire in 6 hours.',
+        source: 'logs',
       },
       {
         type: 'text',
@@ -125,6 +128,18 @@ const initialMessages = [
           { id: 'view-logs', label: 'Show me the logs' },
         ],
       },
+    ],
+    reasoning: [
+      'Queried delivery logs for the last 24 hours',
+      'Detected 47 failures clustered on GitHub push webhook endpoint',
+      'Cross-referenced with GitHub status API \u2014 no reported incidents',
+      'Analyzed response patterns: gateway timeout at 10s, not endpoint failure',
+      'Checked historical data \u2014 similar pattern resolved within 2 hours last time',
+    ],
+    followUps: [
+      'What about the other providers?',
+      'Show me the last 7 days trend',
+      'Set up an alert for GitHub',
     ],
   },
 ]

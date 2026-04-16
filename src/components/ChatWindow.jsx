@@ -143,7 +143,7 @@ export default function ChatWindow({ messages, isTyping, onSend, onAction, mount
             </div>
             {items.map((item) => {
               if (item.type === 'separator') return <div key={item.key} style={styles.separator} />
-              return <MessageBubble key={item.key} message={item.message} onAction={onAction} animate={item.animate} />
+              return <MessageBubble key={item.key} message={item.message} onAction={onAction} onSend={onSend} animate={item.animate} />
             })}
             {isTyping && (
               <div style={styles.typingRow}>
