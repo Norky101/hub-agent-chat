@@ -194,13 +194,17 @@ const secondaryActions = {
   'retry-timeouts': 'Retrying the 43 timeout events now. I\u2019ll hold the 4 malformed ones for your review \u2014 they may need manual payload inspection before re-delivery.',
 }
 
-const agentReplies = [
+const keywords = /\b(shopify|stripe|github|twilio|sendgrid|webhook|event|endpoint|retry|fail|error|503|log|provider|latency|queue|alert|pause|status|deliver|pipeline)\b/i
+
+const relevantReplies = [
   'Checking on that now. Give me a moment to pull the latest data.',
   'Got it. I\u2019ll look into that and report back with what I find.',
-  'Let me cross-reference that against the delivery logs. One moment.',
   'Running that query now. I\u2019ll have results in a few seconds.',
   'I\u2019ll investigate and follow up with a recommendation.',
+  'Let me pull the relevant logs and get back to you.',
 ]
+
+const fallbackReply = 'I\u2019m not sure what you\u2019re asking. I can help with webhook pipeline monitoring, provider health, delivery logs, retries, and event troubleshooting. Try asking about a specific provider or issue.'
 
 function App() {
   const [messages, setMessages] = useState(initialMessages)
@@ -225,16 +229,25 @@ function App() {
       blocks: [{ type: 'text', content: text }],
     })
 
+    const isRelevant = keywords.test(text)
+    const reply = isRelevant
+      ? relevantReplies[Math.floor(Math.random() * relevantReplies.length)]
+      : fallbackReply
+
     setIsTyping(true)
     setTimeout(() => {
       setIsTyping(false)
-      addMessage({
+      const msg = {
         id: (Date.now() + 1).toString(),
         role: 'agent',
         timestamp: new Date().toISOString(),
-        blocks: [{ type: 'text', content: agentReplies[Math.floor(Math.random() * agentReplies.length)] }],
-      })
-    }, 1000 + Math.random() * 1200)
+        blocks: [{ type: 'text', content: reply }],
+      }
+      if (!isRelevant) {
+        msg.followUps = ['Show provider health', 'Any failed events?', 'Pipeline overview']
+      }
+      addMessage(msg)
+    }, isRelevant ? 1000 + Math.random() * 1200 : 500)
   }, [addMessage])
 
   const handleAction = useCallback((action) => {
