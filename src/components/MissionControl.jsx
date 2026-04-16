@@ -17,6 +17,8 @@ const styles = {
     opacity: visible ? 1 : 0,
     pointerEvents: visible ? 'auto' : 'none',
     transition: 'opacity 0.3s ease',
+    overflowY: 'auto',
+    WebkitOverflowScrolling: 'touch',
   }),
   header: {
     display: 'flex',
