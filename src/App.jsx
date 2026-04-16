@@ -260,6 +260,126 @@ const queryResponses = {
     ],
     followUps: ['Show Stripe delivery logs', 'Which provider does have failures?', 'Pipeline overview'],
   },
+  'break down by provider': {
+    blocks: [
+      { type: 'text', content: 'Here\u2019s the 7-day volume split by provider:', source: 'live' },
+      {
+        type: 'table',
+        data: {
+          columns: [
+            { key: 'provider', label: 'Provider', type: 'name' },
+            { key: 'volume', label: '7-Day Vol', align: 'right' },
+            { key: 'pct', label: 'Share', align: 'right' },
+          ],
+          rows: [
+            { provider: 'Shopify', volume: '84,200', pct: '50.1%' },
+            { provider: 'Stripe', volume: '55,400', pct: '33.0%' },
+            { provider: 'GitHub', volume: '18,900', pct: '11.3%' },
+            { provider: 'Twilio', volume: '7,100', pct: '4.2%' },
+            { provider: 'SendGrid', volume: '2,400', pct: '1.4%' },
+          ],
+        },
+      },
+      { type: 'text', content: '**Shopify** and **Stripe** account for **83%** of your total volume. GitHub is third but has the highest failure rate this week at **5.8%** due to today\u2019s incident.' },
+    ],
+    followUps: ['Show failure rates by provider', 'Shopify trend this week', 'Export breakdown'],
+  },
+  'show failure rate trend': {
+    blocks: [
+      { type: 'text', content: 'Failure rate across your pipeline over the last 7 days:', source: 'logs' },
+      {
+        type: 'metric',
+        data: {
+          label: '7-Day Failure Rate',
+          value: '0.6%',
+          trend: -15,
+          positive: true,
+          period: 'down from 0.7% last week',
+          sparkline: [0.8, 0.5, 0.4, 0.3, 0.5, 0.4, 2.0],
+          breakdown: [
+            { label: 'Mon', value: '0.8%' },
+            { label: 'Tue', value: '0.5%' },
+            { label: 'Wed', value: '0.4%' },
+            { label: 'Thu', value: '0.3%' },
+            { label: 'Fri', value: '0.5%' },
+            { label: 'Sat', value: '0.4%' },
+            { label: 'Sun', value: '2.0%' },
+          ],
+        },
+      },
+      { type: 'text', content: 'The spike to **2.0%** today is entirely the GitHub incident. Without that, you\u2019d be at **0.3%** \u2014 your best day this week. The overall trend is healthy and improving.' },
+    ],
+  },
+  'export this data': {
+    blocks: [
+      { type: 'text', content: 'I can export in three formats:' },
+      { type: 'text', content: '\u2022 **CSV** \u2014 raw data, opens in Excel/Sheets\n\u2022 **JSON** \u2014 structured, ready for API consumption\n\u2022 **PDF** \u2014 formatted report with charts' },
+      {
+        type: 'actions',
+        data: [
+          { id: 'export-csv', label: 'Export CSV' },
+          { id: 'export-json', label: 'Export JSON' },
+          { id: 'export-pdf', label: 'Export PDF' },
+        ],
+      },
+    ],
+  },
+  'handle the github failures': {
+    blocks: [
+      { type: 'text', content: 'The **47 GitHub failures** are all push event webhooks hitting 503 timeouts. Here\u2019s what I\u2019d recommend:', source: 'logs' },
+      { type: 'text', content: '**Option 1:** Retry with **30s extended timeout** \u2014 most should recover now that the gateway load has dropped.\n**Option 2:** Wait for GitHub\u2019s next maintenance window (**~2 hours**) and retry the full batch cleanly.' },
+      {
+        type: 'actions',
+        data: [
+          { id: 'retry-now', label: 'Retry now with extended timeout' },
+          { id: 'assign-agent', label: 'Assign to AI Agent' },
+        ],
+      },
+    ],
+  },
+  'yes show me github': {
+    blocks: [
+      { type: 'text', content: '**GitHub** has been returning **503s** on the push event endpoint for about 45 minutes. Response times jumped from **200ms to 12s** before timing out. **47 events** are in the retry queue.', source: 'logs' },
+      { type: 'text', content: 'My read: their API gateway is throttling under load. This matches a pattern I\u2019ve seen before \u2014 the last time it happened, it resolved within **2 hours**. I\u2019d retry with an extended timeout now and catch most of them.' },
+      {
+        type: 'actions',
+        data: [
+          { id: 'retry-now', label: 'Retry with extended timeout' },
+          { id: 'pause-endpoint', label: 'Pause & buffer' },
+          { id: 'view-logs', label: 'Show me the logs' },
+        ],
+      },
+    ],
+    reasoning: [
+      'Queried delivery logs filtered to GitHub push events',
+      'Analyzed 47 failure responses \u2014 all 503 gateway timeouts',
+      'Checked GitHub status API \u2014 no reported incidents',
+      'Compared to historical pattern \u2014 matches 2-hour throttle cycle',
+    ],
+  },
+  'provider breakdown': {
+    blocks: [
+      { type: 'text', content: 'Provider breakdown for today:', source: 'live' },
+      {
+        type: 'table',
+        data: {
+          columns: [
+            { key: 'provider', label: 'Provider', type: 'name' },
+            { key: 'status', label: 'Health', type: 'status' },
+            { key: 'events', label: 'Events', align: 'right' },
+          ],
+          rows: [
+            { provider: 'Shopify', status: 'Healthy', events: '12,340' },
+            { provider: 'Stripe', status: 'Healthy', events: '8,204' },
+            { provider: 'GitHub', status: 'Degraded', events: '2,891' },
+            { provider: 'Twilio', status: 'Healthy', events: '1,105' },
+            { provider: 'SendGrid', status: 'Healthy', events: '307' },
+          ],
+        },
+      },
+    ],
+    followUps: ['What\u2019s wrong with GitHub?', 'Compare to yesterday', 'Set up alerts'],
+  },
   'what about the other providers?': {
     blocks: [
       { type: 'text', content: 'The other four are running clean. **Shopify** is your highest volume at **12,340 events** with a **99.8%** delivery rate. **Stripe** is close behind at **8,204** and **99.9%** \u2014 essentially flawless. **Twilio** and **SendGrid** are low volume but both at **100%** delivery.', source: 'live' },
@@ -376,6 +496,9 @@ const queryResponses = {
 const alertActions = {
   'confirm-alert': 'Done. Three alerts configured for GitHub: **error rate >5%**, **latency >5s**, and **queue depth >20**. Notifications will go to Slack #ops-alerts and your email. I\u2019ll also add a 1-minute cooldown so you don\u2019t get spammed during an incident.',
   'customize-alert': 'Sure. What would you like to adjust? You can change the thresholds, the notification channels, or add provider-specific rules. For example, you might want tighter thresholds for Stripe since payment webhooks are critical.',
+  'export-csv': 'Generating CSV export of the 7-day pipeline data. File will include: provider, event count, success rate, failure count, avg latency, and timestamps. Download link ready in a moment.',
+  'export-json': 'Generating structured JSON export. Includes all provider metrics, event breakdowns, and failure details. Ready for API consumption or import into your monitoring dashboard.',
+  'export-pdf': 'Building a formatted PDF report with pipeline summary, provider breakdown chart, failure analysis, and the GitHub incident timeline. This will take a few seconds to render.',
 }
 
 // Proactive incident alert — fires after 45 seconds
