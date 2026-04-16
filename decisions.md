@@ -187,3 +187,32 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 **Why:** SMS requires Twilio ($1+/month phone number), a backend webhook endpoint (CF Worker), message storage, and relay logic between SMS and the web UI. That's 6-8 hours of backend work in a 24-hour frontend evaluation. Aaron is testing design eye and React quality, not infrastructure. The effort-to-impression ratio is terrible — most of the work is invisible plumbing.
 
 **What we'd do with more time:** CF Worker receiving Twilio webhooks, D1 for message storage (reusing Part 1's infra pattern), WebSocket or polling for real-time sync between SMS and web UI. The architecture is straightforward — it's just not the right use of time here.
+
+---
+
+## 21. Design Pivot — From Chat Widget to Full-Screen AI Assistant
+
+**Decision:** Completely redesign from a boxed chat widget (720px container, message bubbles, header bar) to a full-screen, centered experience modeled after ChatGPT and Jarvis AI.
+
+**Why:** The first build looked like every tutorial chat app — white bubbles stacked vertically in a box. It didn't look like a product anyone would ship. Reference screenshots from Noah (Jarvis AI, ChatGPT dark UI, Synecdoche, premium agency sites) all share the same pattern: full-screen, centered content, no header chrome, immersive visual identity, open text instead of bubbles.
+
+**What changed:**
+- Layout: boxed 720px container → full-screen centered (~680px content width)
+- Messages: agent messages in bubbles → open flowing text, no bubble
+- User messages: white bubbles → subtle right-aligned dark pills
+- Header: avatar + name + status bar → removed entirely, agent identity in welcome screen
+- Welcome: simple text → centered iridescent gradient orb with agent name (Jarvis-style)
+- Rich content: cards inside bubbles → standalone elegant blocks in the conversation flow
+- Input: small input bar → large, comfortable, ChatGPT-style centered input
+
+**Alternatives considered:** Keeping the chat widget pattern and just polishing it. But polish can't fix a wrong layout paradigm — the reference UIs are fundamentally different from a traditional chat widget.
+
+---
+
+## 22. No Message Bubbles for Agent Responses
+
+**Decision:** Agent messages render as open text without any bubble/background/border. User messages get a subtle dark rounded pill.
+
+**Why:** Every premium AI chat (ChatGPT, Claude, Gemini, Jarvis) uses open text for AI responses. Bubbles are a pattern from SMS/messaging apps — they make sense for peer-to-peer chat but feel wrong for an AI assistant. The asymmetry (no bubble for agent, dark pill for user) creates clear visual distinction without the "chatbot widget" feel.
+
+**Alternatives considered:** Keeping subtle bubbles for agent messages. This always looks like Intercom/Zendesk no matter how you style it.

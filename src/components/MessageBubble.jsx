@@ -1,105 +1,92 @@
 import theme from '../theme.js'
-import AgentAvatar from './AgentAvatar.jsx'
 import MetricCard from './MetricCard.jsx'
 import DataTable from './DataTable.jsx'
 import ActionButtons from './ActionButtons.jsx'
 
 const styles = {
-  row: (isUser, animate, direction) => ({
+  row: (isUser, animate) => ({
     display: 'flex',
-    flexDirection: isUser ? 'row-reverse' : 'row',
-    alignItems: 'flex-start',
-    gap: 12,
+    justifyContent: isUser ? 'flex-end' : 'flex-start',
     padding: '2px 0',
-    animation: animate ? `${direction} 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards` : 'none',
     opacity: animate ? 0 : 1,
+    animation: animate ? `fadeUp 0.4s ${theme.transition.smooth.split(' ').slice(1).join(' ')} forwards` : 'none',
   }),
-  content: (isUser) => ({
-    maxWidth: '85%',
+  agentContent: {
+    maxWidth: '100%',
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
-    alignItems: isUser ? 'flex-end' : 'flex-start',
-  }),
-  bubble: (isUser) => ({
+    gap: 16,
+  },
+  agentText: {
     fontSize: 15,
-    lineHeight: 1.65,
+    lineHeight: 1.7,
     fontFamily: theme.fonts.sans,
     fontWeight: 400,
-    color: isUser ? theme.colors.userText : theme.colors.text,
-    background: isUser ? theme.colors.userBubble : theme.colors.surface,
-    border: isUser ? 'none' : `1px solid ${theme.colors.border}`,
-    padding: '12px 18px',
-    borderRadius: isUser ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+    color: theme.colors.text,
+    letterSpacing: '0.01em',
+  },
+  userPill: {
+    fontSize: 15,
+    lineHeight: 1.6,
+    fontFamily: theme.fonts.sans,
+    fontWeight: 400,
+    color: theme.colors.userText,
+    background: theme.colors.userBubble,
+    padding: '10px 18px',
+    borderRadius: '20px 20px 4px 20px',
+    maxWidth: '75%',
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
-    letterSpacing: '0.01em',
-  }),
-  meta: (isUser) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
+  },
+  timestamp: {
     fontSize: 11,
-    color: theme.colors.textTertiary,
+    color: theme.colors.textFaint,
     fontFamily: theme.fonts.sans,
-    flexDirection: isUser ? 'row-reverse' : 'row',
+    marginTop: 4,
     letterSpacing: '0.02em',
-  }),
-  name: {
-    fontWeight: 500,
-    color: theme.colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: '0.06em',
-    fontSize: 10,
   },
-  dot: {
-    width: 2,
-    height: 2,
-    borderRadius: '50%',
-    background: theme.colors.textTertiary,
-  },
-  avatarSpacer: {
-    width: 32,
-    minWidth: 32,
-  },
-  block: (delay) => ({
-    animationDelay: delay > 0 ? `${delay}ms` : undefined,
-  }),
 }
 
 function formatTime(ts) {
-  const d = new Date(ts)
-  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+  return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 }
 
 export default function MessageBubble({ message, onAction, animate }) {
   const isUser = message.role === 'user'
-  const showMeta = message.showMeta !== false
-  const showAvatar = !isUser && showMeta
+
+  if (isUser) {
+    return (
+      <div style={styles.row(true, animate)}>
+        <div>
+          <div style={styles.userPill}>
+            {message.blocks[0]?.content}
+          </div>
+          {message.showMeta && (
+            <div style={{ ...styles.timestamp, textAlign: 'right' }}>
+              {formatTime(message.timestamp)}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div style={styles.row(isUser, animate, isUser ? 'fadeInRight' : 'fadeInLeft')}>
-      {!isUser && (showAvatar ? <AgentAvatar /> : <div style={styles.avatarSpacer} />)}
-      <div style={styles.content(isUser)}>
-        {showMeta && (
-          <div style={styles.meta(isUser)}>
-            {!isUser && <span style={styles.name}>Hub Agent</span>}
-            {!isUser && <span style={styles.dot} />}
-            <span>{formatTime(message.timestamp)}</span>
-          </div>
+    <div style={styles.row(false, animate)}>
+      <div style={styles.agentContent}>
+        {message.showMeta && (
+          <div style={styles.timestamp}>{formatTime(message.timestamp)}</div>
         )}
-
         {message.blocks.map((block, i) => {
-          const delay = animate ? i * 60 : 0
           switch (block.type) {
             case 'text':
-              return <div key={i} style={{ ...styles.bubble(isUser), ...(delay ? { animationDelay: `${delay}ms` } : {}) }}>{block.content}</div>
+              return <div key={i} style={styles.agentText}>{block.content}</div>
             case 'metric':
-              return <div key={i} style={styles.block(delay)}><MetricCard {...block.data} /></div>
+              return <MetricCard key={i} {...block.data} />
             case 'table':
-              return <div key={i} style={styles.block(delay)}><DataTable columns={block.data.columns} rows={block.data.rows} /></div>
+              return <DataTable key={i} columns={block.data.columns} rows={block.data.rows} />
             case 'actions':
-              return <div key={i} style={styles.block(delay)}><ActionButtons actions={block.data} onAction={onAction} /></div>
+              return <ActionButtons key={i} actions={block.data} onAction={onAction} />
             default:
               return null
           }

@@ -1,9 +1,7 @@
 import { useState, useCallback, useRef } from 'react'
 import ChatWindow from './components/ChatWindow.jsx'
-import WelcomeScreen from './components/WelcomeScreen.jsx'
 import InputBar from './components/InputBar.jsx'
 import useSpeechRecognition from './hooks/useSpeechRecognition.js'
-import theme from './theme.js'
 
 const now = new Date()
 const t = (minAgo) => new Date(now.getTime() - minAgo * 60000).toISOString()
@@ -95,23 +93,13 @@ const agentReplies = [
   'On it. Let me know if you need anything else adjusted.',
 ]
 
-const styles = {
-  root: {
-    height: '100%',
-    background: theme.colors.bg,
-  },
-}
-
 function App() {
   const [messages, setMessages] = useState(initialMessages)
   const [isTyping, setIsTyping] = useState(false)
-  const mountedAtRef = useRef(new Date().toISOString())
-  const inputRef = useRef(null)
+  const mountedAt = useRef(new Date().toISOString())
 
   const handleTranscript = useCallback((transcript) => {
-    if (InputBar.setValue) {
-      InputBar.setValue(transcript)
-    }
+    if (InputBar.setValue) InputBar.setValue(transcript)
   }, [])
 
   const { isListening, toggle: toggleMic, supported: speechSupported } = useSpeechRecognition(handleTranscript)
@@ -121,43 +109,38 @@ function App() {
   }, [])
 
   const handleSend = useCallback((text) => {
-    const userMsg = {
+    addMessage({
       id: Date.now().toString(),
       role: 'user',
       timestamp: new Date().toISOString(),
       blocks: [{ type: 'text', content: text }],
-    }
-    addMessage(userMsg)
+    })
 
     setIsTyping(true)
-    const delay = 1200 + Math.random() * 1300
     setTimeout(() => {
       setIsTyping(false)
-      const reply = agentReplies[Math.floor(Math.random() * agentReplies.length)]
       addMessage({
         id: (Date.now() + 1).toString(),
         role: 'agent',
         timestamp: new Date().toISOString(),
-        blocks: [{ type: 'text', content: reply }],
+        blocks: [{ type: 'text', content: agentReplies[Math.floor(Math.random() * agentReplies.length)] }],
       })
-    }, delay)
+    }, 1200 + Math.random() * 1300)
   }, [addMessage])
 
   const handleAction = useCallback(() => {}, [])
 
   return (
-    <div style={styles.root}>
-      <ChatWindow
-        messages={messages}
-        isTyping={isTyping}
-        onSend={handleSend}
-        onAction={handleAction}
-        mountedAt={mountedAtRef.current}
-        speechSupported={speechSupported}
-        isListening={isListening}
-        onToggleMic={toggleMic}
-      />
-    </div>
+    <ChatWindow
+      messages={messages}
+      isTyping={isTyping}
+      onSend={handleSend}
+      onAction={handleAction}
+      mountedAt={mountedAt.current}
+      speechSupported={speechSupported}
+      isListening={isListening}
+      onToggleMic={toggleMic}
+    />
   )
 }
 
