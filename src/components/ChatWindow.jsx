@@ -6,6 +6,10 @@ import InputBar from './InputBar.jsx'
 import HubLogo from './HubLogo.jsx'
 
 const STYLES = `
+  @keyframes pageIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -34,6 +38,8 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     background: theme.colors.bg,
+    animation: 'pageIn 0.8s ease forwards',
+    opacity: 0,
   },
   content: {
     flex: 1,
