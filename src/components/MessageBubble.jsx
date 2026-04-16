@@ -42,10 +42,10 @@ const styles = {
     background: theme.colors.userBubble,
     padding: '11px 18px',
     borderRadius: '20px 20px 4px 20px',
-    maxWidth: '70%',
-    minWidth: 48,
+    maxWidth: '75%',
     whiteSpace: 'pre-wrap',
-    wordBreak: 'break-word',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   },
   timestamp: {
     fontSize: 11,
