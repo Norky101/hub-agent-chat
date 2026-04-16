@@ -417,6 +417,22 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 
 ---
 
+## 40. First Impression Polish — Welcome Pills, Favicon, Mount Animation, Alert Reset
+
+**Decision:** Four refinements focused on the first 10 seconds of the experience:
+
+**Welcome pill specific responses:** Each of the 3 welcome screen prompt pills now produces a rich, specific response — not generic text. "Show me overnight event volume" returns the full metric card with breakdown. "Which providers are failing?" returns a failure table with reasoning trail. "Retry all failed Stripe events" honestly says Stripe has zero active failures. The first click after landing is the most important interaction — it must be excellent.
+
+**Branded favicon:** Replaced the default Vite lightning bolt with the Hub Agent logo (hub node with provider connections). Small detail, but the browser tab is the first thing you see. A default favicon screams "this is a template."
+
+**Staggered mount animation:** Initial messages fade in sequentially (100ms apart, 0.5s each) instead of appearing all at once. The page feels alive from the first moment. New messages still use the faster fadeUp animation.
+
+**Alert timer reset:** "New chat" now resets the proactive alert timer so the Stripe incident fires again 45s into the new conversation. Previously the alert only fired once ever, even across conversations.
+
+**Why all four:** Aaron's first impression happens in the first 10 seconds. Default favicon + static message load + generic first-click response = "this is a demo." Branded favicon + staggered animation + rich first-click = "this is a product."
+
+---
+
 # What I'd Do Differently With More Time
 
 **1. Real AI backend.** The mock responses are crafted to demonstrate the UI, but connecting to Claude's API via a Cloudflare Worker would make the conversation genuinely interactive. The component architecture already supports it — swap the `handleSend` mock for an API call and the blocks render the same way.
