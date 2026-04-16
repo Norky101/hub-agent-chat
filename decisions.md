@@ -348,3 +348,15 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 **Why:** A plain circle has no identity. Every product uses generic shapes. The hub-and-nodes mark directly represents what the product does — a central hub connecting webhook providers. It's distinctive, scales from 18px to 56px without losing legibility, and creates visual continuity across the welcome screen, typing indicator, and conversation header. When the mark pulses during typing, it feels like the hub is actively working — not a generic spinner, but the product itself thinking.
 
 **Design details:** Central node is solid accent (#4F6EF7) with a white core at 0.9 opacity. Three outer nodes at 0.7 opacity positioned asymmetrically (top-left, top-right, bottom-center) to avoid looking like a generic diagram. Connection lines use 50% opacity accent at 1.5px stroke. No external icon library — pure inline SVG, ~30 lines of code.
+
+---
+
+## 35. New Chat Button
+
+**Decision:** Floating pill button in the top-right corner with a pen/compose SVG icon + "New chat" label. Glass-effect background with backdrop blur. Only visible during active conversations — hidden on the welcome screen.
+
+**Why:** A real product needs a way to start fresh without refreshing the page. If you're done investigating GitHub and want to ask about Stripe, the path should be one click — not a page reload. This is a basic affordance that every chat product has (ChatGPT, Claude, Gemini), and its absence would signal "this is a demo, not a product."
+
+**Behavior:** Clears all messages, resets typing state, resets the mountedAt timestamp so new messages in the next conversation animate fresh. Transitions smoothly back to the welcome screen with the logo and prompt pills.
+
+**Alternatives considered:** Sidebar with chat history (too much scope for a conversation component). Keyboard shortcut only (invisible to most users). Icon-only button (not discoverable enough — "New chat" label removes ambiguity).
