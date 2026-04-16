@@ -338,3 +338,13 @@ Every architectural, design, and implementation decision for the Hub Agent Chat 
 **Why:** Aaron "uses Claude agents all day." He knows the difference between an agent that reports and one that reasons. A sharp colleague identifies the problem, tells you why it's happening, suggests what to do, and offers to do it. The action buttons chain: "Show me the logs" → analysis → "Retry all 47" / "Just the 43 timeouts" — each producing specific, contextual follow-through.
 
 **Alternatives considered:** Simple data display with separate "ask me to fix it" flow. But that's two interactions for what should be one — see the problem, understand it, fix it, all in the same thread.
+
+---
+
+## 34. Custom Hub Agent Logo (SVG Mark)
+
+**Decision:** Designed a custom SVG logo: a central hub node (solid accent circle with white inner core) connected to 3 outer provider nodes via thin lines. Used at 56px (welcome screen), 20px (typing indicator, animated), and 18px (agent identity label).
+
+**Why:** A plain circle has no identity. Every product uses generic shapes. The hub-and-nodes mark directly represents what the product does — a central hub connecting webhook providers. It's distinctive, scales from 18px to 56px without losing legibility, and creates visual continuity across the welcome screen, typing indicator, and conversation header. When the mark pulses during typing, it feels like the hub is actively working — not a generic spinner, but the product itself thinking.
+
+**Design details:** Central node is solid accent (#4F6EF7) with a white core at 0.9 opacity. Three outer nodes at 0.7 opacity positioned asymmetrically (top-left, top-right, bottom-center) to avoid looking like a generic diagram. Connection lines use 50% opacity accent at 1.5px stroke. No external icon library — pure inline SVG, ~30 lines of code.
