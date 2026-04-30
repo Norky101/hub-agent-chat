@@ -1,4 +1,4 @@
-# Hub Agent Chat
+# Webhook Manager Agent Chat
 
 A React conversation component for an AI-powered webhook pipeline assistant. Built as a frontend evaluation — the focus is on design eye, React quality, and product instinct.
 
